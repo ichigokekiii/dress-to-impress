@@ -8,7 +8,7 @@ session_start();
 <!DOCTYPE html>
 <html>
 <head>
-	<title></title>
+	<title>Test</title>
 </head>
 <body>
 
