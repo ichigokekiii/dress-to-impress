@@ -1,49 +1,8 @@
 <?php
-include "connection.php";
-include "insert.php";
-include "edit.php";
-
-if (isset($_GET['success']) && $_GET['success'] == 'added') {
-	echo "<script>
-			window.onload = function() {
-				Swal.fire({
-					title: 'Success!',
-					text: 'Contestant added successfully!',
-					icon: 'success',
-					confirmButtonText: 'OK'
-				});
-				showPage('contestants');
-			}
-		</script>";
-} elseif (isset($_GET['error']) && $_GET['error'] == 'duplicate') {
-	echo "<script>
-			window.onload = function() {
-				Swal.fire({
-					title: 'Duplicate ID!',
-					text: 'The contestant ID already exists.',
-					icon: 'error',
-					confirmButtonText: 'Try Again'
-				});
-				showPage('contestants');
-			}
-		</script>";
-}
-if (isset($_GET['success']) && $_GET['success'] == 'deleted') {
-    echo "<script>
-        window.onload = function() {
-            Swal.fire({
-                title: 'Deleted!',
-                text: 'Contestant has been deleted.',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            });
-            showPage('contestants');
-        }
-    </script>";
-}
-
+require_once "connection.php";
+include "contestant_table_query.php";
+include "category_table_query.php";
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -54,9 +13,6 @@ if (isset($_GET['success']) && $_GET['success'] == 'deleted') {
 	<title>Admin Dashboard</title>
 	<link rel="stylesheet" href="style.css">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-
-
 </head>
 
 <body>
@@ -77,7 +33,7 @@ if (isset($_GET['success']) && $_GET['success'] == 'deleted') {
 			<h2>Overview</h2>
 		</div>
 
-		
+
 		<div id="contestants" class="d-none">
 			<h2>Contestants</h2>
 			<button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addContestantModal">Add Contestant</button>
@@ -90,12 +46,6 @@ if (isset($_GET['success']) && $_GET['success'] == 'deleted') {
 						</div>
 						<div class="modal-body">
 							<form action="admin_dashboard.php" method="POST">
-								<div class="row">
-									<div class="col">
-										<label for="contestant_id" class="form-label">Contestant Id</label>
-										<input type="text" class="form-control" id="contestant_id" name="contestant_id" required>
-									</div>
-								</div>
 								<div class="row">
 									<div class="col">
 										<label for="contestant_name" class="form-label">Contestant Name</label>
@@ -128,7 +78,7 @@ if (isset($_GET['success']) && $_GET['success'] == 'deleted') {
 								<div class="row mt-4">
 									<div class="col text-end">
 										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-										<button type="submit" class="btn btn-primary" name="submit">Save Contestant</button>
+										<button type="submit" class="btn btn-primary" name="save_contestant">Save Contestant</button>
 									</div>
 								</div>
 							</form>
@@ -176,7 +126,7 @@ if (isset($_GET['success']) && $_GET['success'] == 'deleted') {
 										onclick="populateEditModal(this)">
 										Edit
 									</a>
-									<a href="#" class="btn btn-danger" onclick="confirmDelete(<?php echo $row['contestant_id']; ?>)">Delete</a>
+									<a href="#" class="btn btn-danger" onclick="confirmDeleteContestant(<?php echo $row['contestant_id']; ?>)">Delete</a>
 								</td>
 							</tr>
 						</tbody>
@@ -192,21 +142,77 @@ if (isset($_GET['success']) && $_GET['success'] == 'deleted') {
 
 		<!-- Categories -->
 		<div id="categories" class="d-none">
-			<h2>Category Table</h2>
-			<button class="btn btn-primary mb-2">Add Category</button>
-			<input type="text" class="form-control search-box" placeholder="Search Categories..." onkeyup="searchTable('category-table', this.value)">
-			<div class="table-container">
-				<table class="table table-bordered" id="category-table">
-					<thead>
-						<tr>
-							<th>Category Name</th>
-						</tr>
-					</thead>
-					<tbody>
-						<!-- PHP-generated rows go here -->
-					</tbody>
-				</table>
+			<h2>Categories</h2>
+			<button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addCategoryModal">Add Category</button>
+			<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="addContestantModalLabel">Add Category</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+							<form action="admin_dashboard.php" method="POST">
+								<div class="row">
+									<div class="col">
+										<label for="category_name" class="form-label">Category Name</label>
+										<input type="text" class="form-control" id="category_name" name="category_name" required>
+									</div>
+								</div>
+
+								<div class="row mt-4">
+									<div class="col text-end">
+										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+										<button type="submit" class="btn btn-primary" name="submit">Save Category</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
 			</div>
+			<input type="text" class="form-control search-box" placeholder="Search Category..." onkeyup="searchTable('categoryTable', this.value)">
+
+			<?php
+			$query = "SELECT * FROM category_table";
+			$query_run = mysqli_query($conn, $query);
+			?>
+			<table class="table table-bordered" id="categoryTable">
+				<thead>
+					<th>Category Id</th>
+					<th>Category Name</th>
+				</thead>
+
+				<?php
+
+				if ($query_run) {
+					while ($row = mysqli_fetch_array($query_run)) {
+				?>
+						<tbody>
+							<tr>
+								<td><?php echo $row['category_id']; ?></td>
+								<td><?php echo $row['category_name']; ?></td>
+								<td class="">
+									<a href="#" class="btn btn-success"
+										data-bs-toggle="modal"
+										data-bs-target="#editCategoryModal"
+										data-id="<?php echo $row['category_id']; ?>"
+										data-name="<?php echo $row['category_name']; ?>"
+										onclick="populateEditCategoryModal(this)">
+										Edit
+									</a>
+									<a href="#" class="btn btn-danger" onclick="confirmDeleteCategory(<?php echo $row['category_id']; ?>)">Delete</a>
+								</td>
+							</tr>
+						</tbody>
+				<?php
+					}
+				} else {
+					echo "No record Found";
+				}
+
+				?>
+			</table>
 		</div>
 
 		<!-- Judges -->
@@ -287,6 +293,7 @@ if (isset($_GET['success']) && $_GET['success'] == 'deleted') {
 		function showPage(id) {
 			document.querySelectorAll('.content > div').forEach(div => div.classList.add('d-none'));
 			document.getElementById(id).classList.remove('d-none');
+			history.replaceState(null, null, '?page=' + id);
 		}
 
 		function searchTable(tableId, searchValue) {
@@ -306,7 +313,12 @@ if (isset($_GET['success']) && $_GET['success'] == 'deleted') {
 			document.getElementById('edit_description').value = element.getAttribute('data-description');
 		}
 
-		function confirmDelete(id) {
+		function populateEditCategoryModal(element) {
+			document.getElementById('edit_category_id').value = element.getAttribute('data-id');
+			document.getElementById('edit_category_name').value = element.getAttribute('data-name');
+		}
+
+		function confirmDeleteContestant(id) {
 			Swal.fire({
 				title: 'Are you sure?',
 				text: "You won't be able to revert this!",
@@ -317,10 +329,36 @@ if (isset($_GET['success']) && $_GET['success'] == 'deleted') {
 				confirmButtonText: 'Yes, delete it!'
 			}).then((result) => {
 				if (result.isConfirmed) {
-					window.location.href = 'delete.php?id=' + id;
+					window.location.href = 'contestant_table_query.php?id=' + id;
 				}
 			});
 		}
+
+		function confirmDeleteCategory(id) {
+			Swal.fire({
+				title: 'Are you sure?',
+				text: "You won't be able to revert this!",
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#d33',
+				cancelButtonColor: '#3085d6',
+				confirmButtonText: 'Yes, delete it!'
+			}).then((result) => {
+				if (result.isConfirmed) {
+					window.location.href = 'category_table_query.php?id=' + id;
+				}
+			});
+		}
+		document.addEventListener('DOMContentLoaded', function() {
+			// Check URL parameters for page to show
+			const urlParams = new URLSearchParams(window.location.search);
+			const pageToShow = urlParams.get('page');
+
+			// If a page parameter exists, show that page
+			if (pageToShow) {
+				showPage(pageToShow);
+			}
+		});
 	</script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
