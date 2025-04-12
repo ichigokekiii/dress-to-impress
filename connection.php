@@ -2,15 +2,12 @@
 
 $servername = "localhost"; 
 $username = "root"; 
-$password = "1234"; 
+$password = ""; 
 $database = "user"; 
 
 
 $conn = new mysqli($servername, $username, $password, $database);
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
+//tinggal ko muna ung conn-error kasi yun ang error dito sa mac
 
 ?>
