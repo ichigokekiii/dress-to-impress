@@ -2,6 +2,7 @@
 require_once "connection.php";
 include "contestant_table_query.php";
 include "category_table_query.php";
+include "judge_table_query.php";
 ?>
 
 <!DOCTYPE html>
@@ -217,22 +218,87 @@ include "category_table_query.php";
 
 		<!-- Judges -->
 		<div id="judges" class="d-none">
-			<h2>Judge Table</h2>
-			<button class="btn btn-primary mb-2">Add Judge</button>
-			<input type="text" class="form-control search-box" placeholder="Search Judges..." onkeyup="searchTable('judge-table', this.value)">
-			<div class="table-container">
-				<table class="table table-bordered" id="judge-table">
-					<thead>
-						<tr>
-							<th>Name</th>
-							<th>Contact Information</th>
-						</tr>
-					</thead>
-					<tbody>
-						<!-- PHP-generated rows go here -->
-					</tbody>
-				</table>
+			<h2>Judges</h2>
+			<button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addJudgeModal">Add Judge</button>
+			<div class="modal fade" id="addJudgeModal" tabindex="-1" aria-labelledby="addJudgeModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="addJudgeModalLabel">Add Judge</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+							<form action="admin_dashboard.php" method="POST">
+								<div class="row">
+									<div class="col">
+										<label for="judge_name" class="form-label">Judge Name</label>
+										<input type="text" class="form-control" id="judge_name" name="judge_name" required>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col">
+										<label for="contact_information" class="form-label">Contact Information</label>
+										<input type="text" class="form-control" id="contact_information" name="contact_information" required>
+									</div>
+								</div>
+
+								<div class="row mt-4">
+									<div class="col text-end">
+										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+										<button type="submit" class="btn btn-primary" name="save_judge">Save Judge</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
 			</div>
+			<input type="text" class="form-control search-box" placeholder="Search Judge..." onkeyup="searchTable('judgeTable', this.value)">
+
+			<?php
+			$query = "SELECT * FROM judge_table";
+			$query_run = $conn->query($query);
+			?>
+			<table class="table table-bordered" id="judgeTable">
+				<thead>
+					<th>Judge Id</th>
+					<th>Judge Name</th>
+					<th>Contact Information</th>
+					<th style="width: 15%;">Action</th>
+				</thead>
+
+				<?php
+
+				if ($query_run) {
+					while ($row = mysqli_fetch_array($query_run)) {
+				?>
+						<tbody>
+							<tr>
+								<td><?php echo $row['judge_id']; ?></td>
+								<td><?php echo $row['judge_name']; ?></td>
+								<td><?php echo $row['contact_information']; ?></td>
+								<td class="">
+									<a href="#" class="btn btn-success"
+										data-bs-toggle="modal"
+										data-bs-target="#editJudgeModal"
+										data-id="<?php echo $row['judge_id']; ?>"
+										data-name="<?php echo $row['judge_name']; ?>"
+										data-info="<?php echo $row['contact_information']; ?>"
+										onclick="populateEditJudgeModal(this)">
+										Edit
+									</a>
+									<a href="#" class="btn btn-danger" onclick="confirmDeleteJudge(<?php echo $row['judge_id']; ?>)">Delete</a>
+								</td>
+							</tr>
+						</tbody>
+				<?php
+					}
+				} else {
+					echo "No record Found";
+				}
+
+				?>
+			</table>
 		</div>
 
 		<!-- Scores -->
