@@ -90,7 +90,7 @@ include "judge_table_query.php";
 			<input type="text" class="form-control search-box" placeholder="Search Contestants..." onkeyup="searchTable('contestantTable', this.value)">
 
 			<?php
-			$query = "SELECT * FROM contestant_table";
+			$query = "SELECT * FROM Constestant";
 			$query_run = mysqli_query($conn, $query);
 			?>
 			<table class="table table-bordered" id="contestantTable">
@@ -175,7 +175,7 @@ include "judge_table_query.php";
 			<input type="text" class="form-control search-box" placeholder="Search Category..." onkeyup="searchTable('categoryTable', this.value)">
 
 			<?php
-			$query = "SELECT * FROM category_table";
+			$query = "SELECT * FROM Category";
 			$query_run = mysqli_query($conn, $query);
 			?>
 			<table class="table table-bordered" id="categoryTable">
@@ -256,7 +256,7 @@ include "judge_table_query.php";
 			<input type="text" class="form-control search-box" placeholder="Search Judge..." onkeyup="searchTable('judgeTable', this.value)">
 
 			<?php
-			$query = "SELECT * FROM judge_table";
+			$query = "SELECT * FROM Judge";
 			$query_run = $conn->query($query);
 			?>
 			<table class="table table-bordered" id="judgeTable">

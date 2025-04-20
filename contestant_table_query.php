@@ -9,7 +9,7 @@ if (isset($_POST['update_contestant'])) {
     $category = $_POST['category'];
     $description = $_POST['description'];
 
-    $update_query_contestants = "UPDATE contestant_table SET
+    $update_query_contestants = "UPDATE Contestant SET
 					 contestant_name = '$contestant_name',
 					 contestant_number = '$contestant_number',
 					 category = '$category',
@@ -88,7 +88,7 @@ if (isset($_POST['save_contestant'])) {
     $category = $_POST['category'];
     $description = $_POST['description'];
 
-    $insert_query_contestant = "INSERT INTO contestant_table (contestant_name, contestant_number, category, descript)
+    $insert_query_contestant = "INSERT INTO Contestant (contestant_name, contestant_number, category, descript)
                      VALUES ('$contestant_name', '$contestant_number', '$category', '$description')";
 
     $result_contestant = mysqli_query($conn, $insert_query_contestant);
@@ -108,7 +108,7 @@ if (isset($_POST['save_contestant'])) {
 if (isset($_GET['id'])) { 
 	$id = $_GET['id'];
 
-    $query_contestant = "DELETE FROM contestant_table WHERE contestant_id = '$id'";
+    $query_contestant = "DELETE FROM Contestant WHERE contestant_id = '$id'";
     $result_contestant = mysqli_query($conn, $query_contestant); 
 
 	if ($result_contestant) {
