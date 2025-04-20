@@ -3,7 +3,7 @@
 $servername = "localhost"; 
 $username = "root"; 
 $password = ""; 
-$database = "user"; 
+$database = "dti_schema"; 
 
 
 $conn = new mysqli($servername, $username, $password, $database);
