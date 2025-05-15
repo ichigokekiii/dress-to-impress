@@ -13,7 +13,7 @@ include "judge_table_query.php";
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Admin Dashboard</title>
 	<link rel="stylesheet" href="style.css">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
 </head>
 
 <body>
@@ -415,6 +415,8 @@ include "judge_table_query.php";
 				}
 			});
 		}
+		
+		// Replace your current DOMContentLoaded script with this enhanced version
 		document.addEventListener('DOMContentLoaded', function() {
 			// Check URL parameters for page to show
 			const urlParams = new URLSearchParams(window.location.search);
@@ -423,10 +425,20 @@ include "judge_table_query.php";
 			// If a page parameter exists, show that page
 			if (pageToShow) {
 				showPage(pageToShow);
+			} else {
+				// Otherwise, default to showing the overview page
+				showPage('overview');
 			}
+			
+			// Debug check to see if tables are being loaded properly
+			console.log('Tables loaded:', {
+				contestants: document.querySelectorAll('#contestantTable tbody tr').length,
+				categories: document.querySelectorAll('#categoryTable tbody tr').length,
+				judges: document.querySelectorAll('#judgeTable tbody tr').length
+			});
 		});
 	</script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 

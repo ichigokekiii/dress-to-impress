@@ -1,9 +1,3 @@
-<?php
-
-session_start();
-
-
-?>
 
 <!DOCTYPE html>
 <html>
@@ -12,7 +6,13 @@ session_start();
 </head>
 <body>
 
-<h1>THIS IS USER HOME PAGE</h1>
+<?php
+session_start();
+$username = $_SESSION['username'];
+
+?>
+
+<h1>WELCOME, <?php echo $username; ?></h1>
 
 </body>
 </html>
