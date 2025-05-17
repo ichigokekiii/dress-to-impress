@@ -35,6 +35,7 @@ CREATE TABLE `Category` (
 
 LOCK TABLES `Category` WRITE;
 /*!40000 ALTER TABLE `Category` DISABLE KEYS */;
+INSERT INTO `Category` VALUES (1,'swimming');
 /*!40000 ALTER TABLE `Category` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -61,6 +62,7 @@ CREATE TABLE `Contestant` (
 
 LOCK TABLES `Contestant` WRITE;
 /*!40000 ALTER TABLE `Contestant` DISABLE KEYS */;
+INSERT INTO `Contestant` VALUES (1,'name',NULL,NULL,NULL),(2,'remiel',1,'summer','nigga');
 /*!40000 ALTER TABLE `Contestant` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -109,6 +111,7 @@ CREATE TABLE `Judge` (
 
 LOCK TABLES `Judge` WRITE;
 /*!40000 ALTER TABLE `Judge` DISABLE KEYS */;
+INSERT INTO `Judge` VALUES (1,'NIGGA','email'),(2,'tron','wala eh');
 /*!40000 ALTER TABLE `Judge` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -140,6 +143,32 @@ LOCK TABLES `Score` WRITE;
 /*!40000 ALTER TABLE `Score` DISABLE KEYS */;
 /*!40000 ALTER TABLE `Score` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `login`
+--
+
+DROP TABLE IF EXISTS `login`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `login` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(45) DEFAULT NULL,
+  `password` varchar(45) DEFAULT NULL,
+  `userType` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `login`
+--
+
+LOCK TABLES `login` WRITE;
+/*!40000 ALTER TABLE `login` DISABLE KEYS */;
+INSERT INTO `login` VALUES (1,'admin','1234','admin'),(2,'user','1234','user'),(3,'remiel','123','admin'),(4,'nigga','123','user');
+/*!40000 ALTER TABLE `login` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -150,4 +179,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-20 11:45:24
+-- Dump completed on 2025-05-17 19:58:28
