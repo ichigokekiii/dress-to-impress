@@ -30,11 +30,12 @@ include "judge_table_query.php";
 	</div>
 
 	<div class="content">
+		<!--Overview-->
 		<div id="overview">
 			<h2>Overview</h2>
 		</div>
 
-
+		<!--Contestants-->
 		<div id="contestants" class="d-none">
 			<h2>Contestants</h2>
 			<button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addContestantModal">Add Contestant</button>
@@ -90,7 +91,7 @@ include "judge_table_query.php";
 			<input type="text" class="form-control search-box" placeholder="Search Contestants..." onkeyup="searchTable('contestantTable', this.value)">
 
 			<?php
-			$query = "SELECT * FROM Constestant";
+			$query = "SELECT * FROM Contestant";
 			$query_run = mysqli_query($conn, $query);
 			?>
 			<table class="table table-bordered" id="contestantTable">
@@ -103,41 +104,40 @@ include "judge_table_query.php";
 					<th style="width: 15%;">Action</th>
 				</thead>
 
-				<?php
+				<tbody>
+					<?php
 
-				if ($query_run) {
-					while ($row = mysqli_fetch_array($query_run)) {
-				?>
-						<tbody>
-							<tr>
-								<td><?php echo $row['contestant_id']; ?></td>
-								<td><?php echo $row['contestant_name']; ?></td>
-								<td><?php echo $row['contestant_number']; ?></td>
-								<td><?php echo $row['category']; ?></td>
-								<td><?php echo $row['descript']; ?></td>
-								<td class="">
-									<a href="#" class="btn btn-success"
-										data-bs-toggle="modal"
-										data-bs-target="#editContestantModal"
-										data-id="<?php echo $row['contestant_id']; ?>"
-										data-name="<?php echo $row['contestant_name']; ?>"
-										data-number="<?php echo $row['contestant_number']; ?>"
-										data-category="<?php echo $row['category']; ?>"
-										data-description="<?php echo $row['descript']; ?>"
-										onclick="populateEditModal(this)">
-										Edit
-									</a>
-									<a href="#" class="btn btn-danger" onclick="confirmDeleteContestant(<?php echo $row['contestant_id']; ?>)">Delete</a>
-								</td>
-							</tr>
-						</tbody>
-				<?php
+					if ($query_run) {
+						while ($row = mysqli_fetch_array($query_run)) {
+					?>
+						<tr>
+							<td><?php echo $row['contestant_id']; ?></td>
+							<td><?php echo $row['contestant_name']; ?></td>
+							<td><?php echo $row['contestant_number']; ?></td>
+							<td><?php echo $row['category']; ?></td>
+							<td><?php echo $row['descript']; ?></td>
+							<td class="">
+								<a href="#" class="btn btn-success"
+									data-bs-toggle="modal"
+									data-bs-target="#editContestantModal"
+									data-id="<?php echo $row['contestant_id']; ?>"
+									data-name="<?php echo $row['contestant_name']; ?>"
+									data-number="<?php echo $row['contestant_number']; ?>"
+									data-category="<?php echo $row['category']; ?>"
+									data-description="<?php echo $row['descript']; ?>"
+									onclick="populateEditModal(this)">
+									Edit
+								</a>
+								<a href="#" class="btn btn-danger" onclick="confirmDeleteContestant(<?php echo $row['contestant_id']; ?>)">Delete</a>
+							</td>
+						</tr>
+					<?php
+						}
+					} else {
+						echo "No record Found";
 					}
-				} else {
-					echo "No record Found";
-				}
-
-				?>
+					?>
+				</tbody>
 			</table>
 		</div>
 
@@ -149,7 +149,7 @@ include "judge_table_query.php";
 				<div class="modal-dialog">
 					<div class="modal-content">
 						<div class="modal-header">
-							<h5 class="modal-title" id="addContestantModalLabel">Add Category</h5>
+							<h5 class="modal-title" id="addCategoryModalLabel">Add Category</h5>
 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 						</div>
 						<div class="modal-body">
@@ -183,36 +183,36 @@ include "judge_table_query.php";
 					<th>Category Id</th>
 					<th>Category Name</th>
 				</thead>
+				
+				<tbody>
+					<?php
 
-				<?php
-
-				if ($query_run) {
-					while ($row = mysqli_fetch_array($query_run)) {
-				?>
-						<tbody>
-							<tr>
-								<td><?php echo $row['category_id']; ?></td>
-								<td><?php echo $row['category_name']; ?></td>
-								<td class="">
-									<a href="#" class="btn btn-success"
-										data-bs-toggle="modal"
-										data-bs-target="#editCategoryModal"
-										data-id="<?php echo $row['category_id']; ?>"
-										data-name="<?php echo $row['category_name']; ?>"
-										onclick="populateEditCategoryModal(this)">
-										Edit
-									</a>
-									<a href="#" class="btn btn-danger" onclick="confirmDeleteCategory(<?php echo $row['category_id']; ?>)">Delete</a>
-								</td>
-							</tr>
-						</tbody>
-				<?php
+					if ($query_run) {
+						while ($row = mysqli_fetch_array($query_run)) {
+					?>
+						<tr>
+							<td><?php echo $row['category_id']; ?></td>
+							<td><?php echo $row['category_name']; ?></td>
+							<td class="">
+								<a href="#" class="btn btn-success"
+									data-bs-toggle="modal"
+									data-bs-target="#editCategoryModal"
+									data-id="<?php echo $row['category_id']; ?>"
+									data-name="<?php echo $row['category_name']; ?>"
+									onclick="populateEditCategoryModal(this)">
+									Edit
+								</a>
+								<a href="#" class="btn btn-danger" onclick="confirmDeleteCategory(<?php echo $row['category_id']; ?>)">Delete</a>
+							</td>
+						</tr>
+					<?php
+						}
+					} else {
+						echo "No record Found";
 					}
-				} else {
-					echo "No record Found";
-				}
 
-				?>
+					?>
+				</tbody>
 			</table>
 		</div>
 
@@ -266,38 +266,37 @@ include "judge_table_query.php";
 					<th>Contact Information</th>
 					<th style="width: 15%;">Action</th>
 				</thead>
-
-				<?php
-
-				if ($query_run) {
-					while ($row = mysqli_fetch_array($query_run)) {
-				?>
-						<tbody>
-							<tr>
-								<td><?php echo $row['judge_id']; ?></td>
-								<td><?php echo $row['judge_name']; ?></td>
-								<td><?php echo $row['contact_information']; ?></td>
-								<td class="">
-									<a href="#" class="btn btn-success"
-										data-bs-toggle="modal"
-										data-bs-target="#editJudgeModal"
-										data-id="<?php echo $row['judge_id']; ?>"
-										data-name="<?php echo $row['judge_name']; ?>"
-										data-info="<?php echo $row['contact_information']; ?>"
-										onclick="populateEditJudgeModal(this)">
-										Edit
-									</a>
-									<a href="#" class="btn btn-danger" onclick="confirmDeleteJudge(<?php echo $row['judge_id']; ?>)">Delete</a>
-								</td>
-							</tr>
-						</tbody>
-				<?php
+				
+				<tbody>
+					<?php
+					if ($query_run) {
+						while ($row = mysqli_fetch_array($query_run)) {
+					?>
+						<tr>
+							<td><?php echo $row['judge_id']; ?></td>
+							<td><?php echo $row['judge_name']; ?></td>
+							<td><?php echo $row['contact_information']; ?></td>
+							<td class="">
+								<a href="#" class="btn btn-success"
+									data-bs-toggle="modal"
+									data-bs-target="#editJudgeModal"
+									data-id="<?php echo $row['judge_id']; ?>"
+									data-name="<?php echo $row['judge_name']; ?>"
+									data-info="<?php echo $row['contact_information']; ?>"
+									onclick="populateEditJudgeModal(this)">
+									Edit
+								</a>
+								<a href="#" class="btn btn-danger" onclick="confirmDeleteJudge(<?php echo $row['judge_id']; ?>)">Delete</a>
+							</td>
+						</tr>
+					<?php
+						}
+					} else {
+						echo "No record Found";
 					}
-				} else {
-					echo "No record Found";
-				}
 
-				?>
+					?>
+				</tbody>
 			</table>
 		</div>
 
