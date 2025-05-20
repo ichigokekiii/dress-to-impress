@@ -13,7 +13,7 @@ include "judge_table_query.php";
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Admin Dashboard</title>
 	<link rel="stylesheet" href="style.css">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -30,12 +30,10 @@ include "judge_table_query.php";
 	</div>
 
 	<div class="content">
-		<!--Overview-->
 		<div id="overview">
 			<h2>Overview</h2>
 		</div>
 
-		<!--Contestants-->
 		<div id="contestants" class="d-none">
 			<h2>Contestants</h2>
 			<button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addContestantModal">Add Contestant</button>
@@ -91,8 +89,8 @@ include "judge_table_query.php";
 			<input type="text" class="form-control search-box" placeholder="Search Contestants..." onkeyup="searchTable('contestantTable', this.value)">
 
 			<?php
-			$query = "SELECT * FROM Contestant";
-			$query_run = mysqli_query($conn, $query);
+			$query = "SELECT * FROM contestant_table";
+			$query_run = $conn->query($query);
 			?>
 			<table class="table table-bordered" id="contestantTable">
 				<thead>
@@ -104,40 +102,41 @@ include "judge_table_query.php";
 					<th style="width: 15%;">Action</th>
 				</thead>
 
-				<tbody>
-					<?php
+				<?php
 
-					if ($query_run) {
-						while ($row = mysqli_fetch_array($query_run)) {
-					?>
-						<tr>
-							<td><?php echo $row['contestant_id']; ?></td>
-							<td><?php echo $row['contestant_name']; ?></td>
-							<td><?php echo $row['contestant_number']; ?></td>
-							<td><?php echo $row['category']; ?></td>
-							<td><?php echo $row['descript']; ?></td>
-							<td class="">
-								<a href="#" class="btn btn-success"
-									data-bs-toggle="modal"
-									data-bs-target="#editContestantModal"
-									data-id="<?php echo $row['contestant_id']; ?>"
-									data-name="<?php echo $row['contestant_name']; ?>"
-									data-number="<?php echo $row['contestant_number']; ?>"
-									data-category="<?php echo $row['category']; ?>"
-									data-description="<?php echo $row['descript']; ?>"
-									onclick="populateEditModal(this)">
-									Edit
-								</a>
-								<a href="#" class="btn btn-danger" onclick="confirmDeleteContestant(<?php echo $row['contestant_id']; ?>)">Delete</a>
-							</td>
-						</tr>
-					<?php
-						}
-					} else {
-						echo "No record Found";
+				if ($query_run) {
+					while ($row = mysqli_fetch_array($query_run)) {
+				?>
+						<tbody>
+							<tr>
+								<td><?php echo $row['contestant_id']; ?></td>
+								<td><?php echo $row['contestant_name']; ?></td>
+								<td><?php echo $row['contestant_number']; ?></td>
+								<td><?php echo $row['category']; ?></td>
+								<td><?php echo $row['descript']; ?></td>
+								<td class="">
+									<a href="#" class="btn btn-success"
+										data-bs-toggle="modal"
+										data-bs-target="#editContestantModal"
+										data-id="<?php echo $row['contestant_id']; ?>"
+										data-name="<?php echo $row['contestant_name']; ?>"
+										data-number="<?php echo $row['contestant_number']; ?>"
+										data-category="<?php echo $row['category']; ?>"
+										data-description="<?php echo $row['descript']; ?>"
+										onclick="populateEditModal(this)">
+										Edit
+									</a>
+									<a href="#" class="btn btn-danger" onclick="confirmDeleteContestant(<?php echo $row['contestant_id']; ?>)">Delete</a>
+								</td>
+							</tr>
+						</tbody>
+				<?php
 					}
-					?>
-				</tbody>
+				} else {
+					echo "No record Found";
+				}
+
+				?>
 			</table>
 		</div>
 
@@ -149,7 +148,7 @@ include "judge_table_query.php";
 				<div class="modal-dialog">
 					<div class="modal-content">
 						<div class="modal-header">
-							<h5 class="modal-title" id="addCategoryModalLabel">Add Category</h5>
+							<h5 class="modal-title" id="addContestantModalLabel">Add Category</h5>
 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 						</div>
 						<div class="modal-body">
@@ -175,44 +174,45 @@ include "judge_table_query.php";
 			<input type="text" class="form-control search-box" placeholder="Search Category..." onkeyup="searchTable('categoryTable', this.value)">
 
 			<?php
-			$query = "SELECT * FROM Category";
-			$query_run = mysqli_query($conn, $query);
+			$query = "SELECT * FROM category_table";
+			$query_run = $conn->query($query);
 			?>
 			<table class="table table-bordered" id="categoryTable">
 				<thead>
-					<th>Category Id</th>
+					<th style="width: 10%;">Category Id</th>
 					<th>Category Name</th>
+					<th style="width: 15%;">Action</th>
 				</thead>
-				
-				<tbody>
-					<?php
 
-					if ($query_run) {
-						while ($row = mysqli_fetch_array($query_run)) {
-					?>
-						<tr>
-							<td><?php echo $row['category_id']; ?></td>
-							<td><?php echo $row['category_name']; ?></td>
-							<td class="">
-								<a href="#" class="btn btn-success"
-									data-bs-toggle="modal"
-									data-bs-target="#editCategoryModal"
-									data-id="<?php echo $row['category_id']; ?>"
-									data-name="<?php echo $row['category_name']; ?>"
-									onclick="populateEditCategoryModal(this)">
-									Edit
-								</a>
-								<a href="#" class="btn btn-danger" onclick="confirmDeleteCategory(<?php echo $row['category_id']; ?>)">Delete</a>
-							</td>
-						</tr>
-					<?php
-						}
-					} else {
-						echo "No record Found";
+				<?php
+
+				if ($query_run) {
+					while ($row = mysqli_fetch_array($query_run)) {
+				?>
+						<tbody>
+							<tr>
+								<td><?php echo $row['category_id']; ?></td>
+								<td><?php echo $row['category_name']; ?></td>
+								<td class="">
+									<a href="#" class="btn btn-success"
+										data-bs-toggle="modal"
+										data-bs-target="#editCategoryModal"
+										data-id="<?php echo $row['category_id']; ?>"
+										data-name="<?php echo $row['category_name']; ?>"
+										onclick="populateEditCategoryModal(this)">
+										Edit
+									</a>
+									<a href="#" class="btn btn-danger" onclick="confirmDeleteCategory(<?php echo $row['category_id']; ?>)">Delete</a>
+								</td>
+							</tr>
+						</tbody>
+				<?php
 					}
+				} else {
+					echo "No record Found";
+				}
 
-					?>
-				</tbody>
+				?>
 			</table>
 		</div>
 
@@ -256,7 +256,7 @@ include "judge_table_query.php";
 			<input type="text" class="form-control search-box" placeholder="Search Judge..." onkeyup="searchTable('judgeTable', this.value)">
 
 			<?php
-			$query = "SELECT * FROM Judge";
+			$query = "SELECT * FROM judge_table";
 			$query_run = $conn->query($query);
 			?>
 			<table class="table table-bordered" id="judgeTable">
@@ -266,37 +266,38 @@ include "judge_table_query.php";
 					<th>Contact Information</th>
 					<th style="width: 15%;">Action</th>
 				</thead>
-				
-				<tbody>
-					<?php
-					if ($query_run) {
-						while ($row = mysqli_fetch_array($query_run)) {
-					?>
-						<tr>
-							<td><?php echo $row['judge_id']; ?></td>
-							<td><?php echo $row['judge_name']; ?></td>
-							<td><?php echo $row['contact_information']; ?></td>
-							<td class="">
-								<a href="#" class="btn btn-success"
-									data-bs-toggle="modal"
-									data-bs-target="#editJudgeModal"
-									data-id="<?php echo $row['judge_id']; ?>"
-									data-name="<?php echo $row['judge_name']; ?>"
-									data-info="<?php echo $row['contact_information']; ?>"
-									onclick="populateEditJudgeModal(this)">
-									Edit
-								</a>
-								<a href="#" class="btn btn-danger" onclick="confirmDeleteJudge(<?php echo $row['judge_id']; ?>)">Delete</a>
-							</td>
-						</tr>
-					<?php
-						}
-					} else {
-						echo "No record Found";
-					}
 
-					?>
-				</tbody>
+				<?php
+
+				if ($query_run) {
+					while ($row = mysqli_fetch_array($query_run)) {
+				?>
+						<tbody>
+							<tr>
+								<td><?php echo $row['judge_id']; ?></td>
+								<td><?php echo $row['judge_name']; ?></td>
+								<td><?php echo $row['contact_information']; ?></td>
+								<td class="">
+									<a href="#" class="btn btn-success"
+										data-bs-toggle="modal"
+										data-bs-target="#editJudgeModal"
+										data-id="<?php echo $row['judge_id']; ?>"
+										data-name="<?php echo $row['judge_name']; ?>"
+										data-info="<?php echo $row['contact_information']; ?>"
+										onclick="populateEditJudgeModal(this)">
+										Edit
+									</a>
+									<a href="#" class="btn btn-danger" onclick="confirmDeleteJudge(<?php echo $row['judge_id']; ?>)">Delete</a>
+								</td>
+							</tr>
+						</tbody>
+				<?php
+					}
+				} else {
+					echo "No record Found";
+				}
+
+				?>
 			</table>
 		</div>
 
@@ -382,6 +383,11 @@ include "judge_table_query.php";
 			document.getElementById('edit_category_id').value = element.getAttribute('data-id');
 			document.getElementById('edit_category_name').value = element.getAttribute('data-name');
 		}
+		function populateEditJudgeModal(element) {
+			document.getElementById('edit_judge_id').value = element.getAttribute('data-id');
+			document.getElementById('edit_judge_name').value = element.getAttribute('data-name');
+			document.getElementById('edit_contact_information').value = element.getAttribute('data-info');
+		}
 
 		function confirmDeleteContestant(id) {
 			Swal.fire({
@@ -414,8 +420,21 @@ include "judge_table_query.php";
 				}
 			});
 		}
-		
-		// Replace your current DOMContentLoaded script with this enhanced version
+		function confirmDeleteJudge(id) {
+			Swal.fire({
+				title: 'Are you sure?',
+				text: "You won't be able to revert this!",
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#d33',
+				cancelButtonColor: '#3085d6',
+				confirmButtonText: 'Yes, delete it!'
+			}).then((result) => {
+				if (result.isConfirmed) {
+					window.location.href = 'judge_table_query.php?id=' + id;
+				}
+			});
+		}
 		document.addEventListener('DOMContentLoaded', function() {
 			// Check URL parameters for page to show
 			const urlParams = new URLSearchParams(window.location.search);
@@ -424,20 +443,10 @@ include "judge_table_query.php";
 			// If a page parameter exists, show that page
 			if (pageToShow) {
 				showPage(pageToShow);
-			} else {
-				// Otherwise, default to showing the overview page
-				showPage('overview');
 			}
-			
-			// Debug check to see if tables are being loaded properly
-			console.log('Tables loaded:', {
-				contestants: document.querySelectorAll('#contestantTable tbody tr').length,
-				categories: document.querySelectorAll('#categoryTable tbody tr').length,
-				judges: document.querySelectorAll('#judgeTable tbody tr').length
-			});
 		});
 	</script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 

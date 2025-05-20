@@ -1,16 +1,15 @@
-<?php 
-//EDIT
+<?php //EDIT
 include "connection.php";
 
 if (isset($_POST['update'])) {
     $category_id = $_POST['category_id'];
     $category_name = $_POST['category_name'];
 
-    $update_query = "UPDATE Category SET
+    $update_query = "UPDATE category_table SET
                      category_name = '$category_name'
                      WHERE category_id = '$category_id'";
 
-    if (mysqli_query($conn, $update_query)) {
+    if ($conn->query($update_query)) {
         header("Location: admin_dashboard.php?page=categories&category_success=updated");
         exit();
     } else {
@@ -75,26 +74,25 @@ if (isset($_GET['category_success'])) {
 
 ?>
 
-<?php 
-//INSERT
+<?php //INSERT
 
 if (isset($_POST['submit'])) {
     
 
     $category_name = $_POST['category_name'];
 
-    $check_query = "SELECT * FROM Category WHERE category_id = '$category_id'"; // Check for duplicate ID
+    $check_query = "SELECT * FROM category_table WHERE category_id = '$category_id'"; // Check for duplicate ID
     $check_result = mysqli_query($conn, $check_query);
 
-    if (mysqli_num_rows($check_result) > 0) {
+    if ($check_result->num_rows > 0) {
         header("Location: admin_dashboard.php?category_error=duplicate");
         exit();
     }
 
-    $insert_query = "INSERT INTO Category (category_name)
+    $insert_query = "INSERT INTO category_table (category_name)
                      VALUES ('$category_name')";
 
-    $result = mysqli_query($conn, $insert_query);
+    $result = $conn->query($insert_query);
 
     if (!$result) {
         header("Location: admin_dashboard.php?category_error=insertfail");
@@ -106,14 +104,13 @@ if (isset($_POST['submit'])) {
 }
 ?>
 
-<?php 
-//DELETE
+<?php ////DELETE
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
 
-    $query = "DELETE FROM Category WHERE category_id = '$id'";
-    $result = mysqli_query($conn, $query);
+    $query = "DELETE FROM category_table WHERE category_id = '$id'";
+    $result = $conn->query($query);
 
     if ($result) {
         header("Location: admin_dashboard.php?page=categories&category_success=deleted");
