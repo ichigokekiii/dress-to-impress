@@ -235,6 +235,12 @@ body {
             font-size: 1rem;
         }
 
+        .page-content {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
         /* Animations */
         @keyframes fadeIn {
             from {
