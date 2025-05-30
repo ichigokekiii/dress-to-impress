@@ -1,8 +1,43 @@
 <?php
+session_start();
 require_once "connection.php";
 include "contestant_table_query.php";
 include "category_table_query.php";
 include "judge_table_query.php";
+
+// Check if user is logged in and is an admin
+if (!isset($_SESSION['user_id']) || $_SESSION['userType'] !== 'Admin') {
+	header("Location: login.php");
+	exit();
+}
+
+// Get overview statistics
+$stats = array();
+
+// Total Contestants
+$result = $conn->query("SELECT COUNT(*) as total FROM contestant_table");
+$stats['contestants'] = $result->fetch_assoc()['total'];
+
+// Total Categories
+$result = $conn->query("SELECT COUNT(*) as total FROM category_table");
+$stats['categories'] = $result->fetch_assoc()['total'];
+
+// Total Judges
+$result = $conn->query("SELECT COUNT(*) as total FROM judge_table");
+$stats['judges'] = $result->fetch_assoc()['total'];
+
+// Recent Activities from logs
+$result = $conn->query("SELECT action, log_time 
+                       FROM logs_table 
+                       ORDER BY log_time DESC LIMIT 5");
+$recent_activities = $result->fetch_all(MYSQLI_ASSOC);
+
+// Get upcoming contests
+$result = $conn->query("SELECT contest_name, contest_date, location 
+                       FROM contest_table 
+                       WHERE contest_date >= CURDATE() 
+                       ORDER BY contest_date ASC LIMIT 3");
+$upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -14,24 +49,130 @@ include "judge_table_query.php";
 	<title>Admin Dashboard</title>
 	<link rel="stylesheet" href="style.css">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body>
 	<div class="sidebar">
 		<h4 class="p-3">Admin Dashboard</h4>
-		<a href="#overview" onclick="showPage('overview')">Overview</a>
-		<a href="#contestants" onclick="showPage('contestants')">Contestant Table</a>
-		<a href="#categories" onclick="showPage('categories')">Category Table</a>
-		<a href="#judges" onclick="showPage('judges')">Judge Table</a>
-		<a href="#scores" onclick="showPage('scores')">Score Table</a>
-		<a href="#criteria" onclick="showPage('criteria')">Criteria Table</a>
-		<a href="#users" onclick="showPage('users')">Users</a>
-		<a href="#logs" onclick="showPage('logs')">Logs</a>
+		<div class="user-info p-3 text-white">
+			<small>Welcome,</small>
+			<div><?php echo htmlspecialchars($_SESSION['username']); ?></div>
+		</div>
+		<a href="#overview" onclick="showPage('overview')"><i class="fas fa-home"></i> Overview</a>
+		<a href="#contests" onclick="showPage('contests')"><i class="fas fa-trophy"></i> Contest Table</a>
+		<a href="#contestants" onclick="showPage('contestants')"><i class="fas fa-users"></i> Contestant Table</a>
+		<a href="#categories" onclick="showPage('categories')"><i class="fas fa-list"></i> Category Table</a>
+		<a href="#judges" onclick="showPage('judges')"><i class="fas fa-gavel"></i> Judge Table</a>
+		<a href="#scores" onclick="showPage('scores')"><i class="fas fa-star"></i> Score Table</a>
+		<a href="#criteria" onclick="showPage('criteria')"><i class="fas fa-tasks"></i> Criteria Table</a>
+		<a href="#users" onclick="showPage('users')"><i class="fas fa-user"></i> Users</a>
+		<a href="#logs" onclick="showPage('logs')"><i class="fas fa-history"></i> Logs</a>
+		<a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
 	</div>
 
 	<div class="content">
 		<div id="overview">
-			<h2>Overview</h2>
+			<h2 class="mb-4">Overview</h2>
+			
+			<!-- Statistics Cards -->
+			<div class="row mb-4">
+				<div class="col-md-3">
+					<div class="card bg-primary text-white">
+						<div class="card-body">
+							<div class="d-flex justify-content-between align-items-center">
+								<div>
+									<h6 class="card-title">Total Contestants</h6>
+									<h2 class="mb-0"><?php echo $stats['contestants']; ?></h2>
+								</div>
+								<i class="fas fa-users fa-2x opacity-50"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3">
+					<div class="card bg-success text-white">
+						<div class="card-body">
+							<div class="d-flex justify-content-between align-items-center">
+								<div>
+									<h6 class="card-title">Total Categories</h6>
+									<h2 class="mb-0"><?php echo $stats['categories']; ?></h2>
+								</div>
+								<i class="fas fa-list fa-2x opacity-50"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3">
+					<div class="card bg-info text-white">
+						<div class="card-body">
+							<div class="d-flex justify-content-between align-items-center">
+								<div>
+									<h6 class="card-title">Total Judges</h6>
+									<h2 class="mb-0"><?php echo $stats['judges']; ?></h2>
+								</div>
+								<i class="fas fa-gavel fa-2x opacity-50"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3">
+					<div class="card <?php echo $conn->ping() ? 'bg-success' : 'bg-danger'; ?> text-white">
+						<div class="card-body">
+							<div class="d-flex justify-content-between align-items-center">
+								<div>
+									<h6 class="card-title">Database Status</h6>
+									<div class="d-flex align-items-center">
+										<span class="status-dot <?php echo $conn->ping() ? 'active' : ''; ?>"></span>
+										<h2 class="mb-0 ms-2"><?php echo $conn->ping() ? 'Connected' : 'Disconnected'; ?></h2>
+									</div>
+									<small>Host: <?php echo $conn->host_info; ?></small>
+								</div>
+								<i class="fas fa-database fa-2x opacity-50"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Upcoming Contests -->
+	
+			<div class="row mb-4">
+				<div class="col-md-6">
+					<div class="card">
+						<div class="card-header">
+							<h5 class="card-title mb-0">Upcoming Contests</h5>
+						</div>
+						<div class="card-body">
+							<?php if (empty($upcoming_contests)): ?>
+								<p class="text-muted">No upcoming contests</p>
+							<?php else: ?>
+								<div class="list-group list-group-flush">
+									<?php foreach ($upcoming_contests as $contest): ?>
+										<div class="list-group-item">
+											<div class="d-flex w-100 justify-content-between">
+												<h6 class="mb-1"><?php echo htmlspecialchars($contest['contest_name']); ?></h6>
+												<small><?php echo date('M d, Y', strtotime($contest['contest_date'])); ?></small>
+											</div>
+											<small class="text-muted">
+												<i class="fas fa-map-marker-alt"></i> 
+												<?php echo htmlspecialchars($contest['location']); ?>
+											</small>
+										</div>
+									<?php endforeach; ?>
+								</div>
+							<?php endif; ?>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Contests -->
+		<div id="contests" class="d-none">
+			<h2>Contests</h2>
+			<button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addContestModal">Add Contest</button>
+			<?php include 'contest_section.php'; ?>
 		</div>
 
 		<div id="contestants" class="d-none">
@@ -45,36 +186,68 @@ include "judge_table_query.php";
 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 						</div>
 						<div class="modal-body">
-							<form action="admin_dashboard.php" method="POST">
-								<div class="row">
+							<form action="contestant_table_query.php" method="POST">
+								<div class="row mb-3">
 									<div class="col">
 										<label for="contestant_name" class="form-label">Contestant Name</label>
 										<input type="text" class="form-control" id="contestant_name" name="contestant_name" required>
 									</div>
 								</div>
-								<div class="row">
+								<div class="row mb-3">
 									<div class="col">
 										<label for="contestant_number" class="form-label">Contestant Number</label>
-										<input type="text" class="form-control" id="contestant_number" name="contestant_number" required>
+										<input type="number" class="form-control" id="contestant_number" name="contestant_number" required>
 									</div>
 								</div>
-								<div class="row">
+								<div class="row mb-3">
 									<div class="col">
-										<label for="category" class="form-label">Category</label>
-										<select class="form-select" id="category" name="category" required>
-											<option value="Miss">Miss</option>
-											<option value="Mister">Mister</option>
-											<option value="Teen">Teen</option>
+										<label for="contest" class="form-label">Contest</label>
+										<select class="form-select" id="contest" name="contest" required>
+											<?php
+											$contest_query = "SELECT contest_id, contest_name FROM contest_table ORDER BY contest_name";
+											$contest_result = $conn->query($contest_query);
+											while ($contest = $contest_result->fetch_assoc()) {
+												echo "<option value='" . $contest['contest_id'] . "'>" . htmlspecialchars($contest['contest_name']) . "</option>";
+											}
+											?>
 										</select>
 									</div>
 								</div>
-								<div class="row">
+								<div class="row mb-3">
 									<div class="col">
-										<label for="description" class="form-label">Description</label>
-										<textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+										<label for="category" class="form-label">Category</label>
+										<select class="form-select" id="category" name="category" required>
+											<?php
+											$category_query = "SELECT category_id, category_name FROM category_table ORDER BY category_name";
+											$category_result = $conn->query($category_query);
+											while ($category = $category_result->fetch_assoc()) {
+												echo "<option value='" . $category['category_id'] . "'>" . htmlspecialchars($category['category_name']) . "</option>";
+											}
+											?>
+										</select>
 									</div>
 								</div>
-
+								<div class="row mb-3">
+									<div class="col">
+										<label for="title" class="form-label">Title</label>
+										<input type="text" class="form-control" id="title" name="title" required>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<div class="col">
+										<label for="bio" class="form-label">Bio</label>
+										<textarea class="form-control" id="bio" name="bio" rows="4" required></textarea>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<div class="col">
+										<label for="gender" class="form-label">Gender</label>
+										<select class="form-select" id="gender" name="gender" required>
+											<option value="Male">Male</option>
+											<option value="Female">Female</option>
+										</select>
+									</div>
+								</div>
 								<div class="row mt-4">
 									<div class="col text-end">
 										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -89,54 +262,62 @@ include "judge_table_query.php";
 			<input type="text" class="form-control search-box" placeholder="Search Contestants..." onkeyup="searchTable('contestantTable', this.value)">
 
 			<?php
-			$query = "SELECT * FROM contestant_table";
+			$query = "SELECT c.*, ct.contest_name, cat.category_name 
+					 FROM contestant_table c
+					 LEFT JOIN contest_table ct ON c.fk_contestant_contest = ct.contest_id
+					 LEFT JOIN category_table cat ON c.fk_contestant_category = cat.category_id
+					 ORDER BY ct.contest_name, c.contestant_number";
 			$query_run = $conn->query($query);
 			?>
 			<table class="table table-bordered" id="contestantTable">
 				<thead>
-					<th>ID</th>
-					<th>Name</th>
-					<th>Number</th>
-					<th>Category</th>
-					<th style="width: 35%;">Description</th>
-					<th style="width: 15%;">Action</th>
+					<tr>
+						<th>ID</th>
+						<th>Contest</th>
+						<th>Number</th>
+						<th>Name</th>
+						<th>Category</th>
+						<th>Title</th>
+						<th>Bio</th>
+						<th>Gender</th>
+						<th style="width: 15%;">Action</th>
+					</tr>
 				</thead>
-
+				<tbody>
 				<?php
-
 				if ($query_run) {
 					while ($row = mysqli_fetch_array($query_run)) {
-				?>
-						<tbody>
-							<tr>
-								<td><?php echo $row['contestant_id']; ?></td>
-								<td><?php echo $row['contestant_name']; ?></td>
-								<td><?php echo $row['contestant_number']; ?></td>
-								<td><?php echo $row['category']; ?></td>
-								<td><?php echo $row['descript']; ?></td>
-								<td class="">
-									<a href="#" class="btn btn-success"
-										data-bs-toggle="modal"
-										data-bs-target="#editContestantModal"
-										data-id="<?php echo $row['contestant_id']; ?>"
-										data-name="<?php echo $row['contestant_name']; ?>"
-										data-number="<?php echo $row['contestant_number']; ?>"
-										data-category="<?php echo $row['category']; ?>"
-										data-description="<?php echo $row['descript']; ?>"
-										onclick="populateEditModal(this)">
-										Edit
-									</a>
-									<a href="#" class="btn btn-danger" onclick="confirmDeleteContestant(<?php echo $row['contestant_id']; ?>)">Delete</a>
-								</td>
-							</tr>
-						</tbody>
-				<?php
+						echo "<tr>";
+						echo "<td>" . $row['contestant_id'] . "</td>";
+						echo "<td>" . htmlspecialchars($row['contest_name']) . "</td>";
+						echo "<td>" . $row['contestant_number'] . "</td>";
+						echo "<td>" . htmlspecialchars($row['contestant_name']) . "</td>";
+						echo "<td>" . htmlspecialchars($row['category_name']) . "</td>";
+						echo "<td>" . htmlspecialchars($row['title']) . "</td>";
+						echo "<td>" . htmlspecialchars($row['bio']) . "</td>";
+						echo "<td>" . htmlspecialchars($row['gender']) . "</td>";
+						echo "<td>";
+						echo "<a href='#' class='btn btn-success btn-sm me-1'
+								data-bs-toggle='modal'
+								data-bs-target='#editContestantModal'
+								data-id='" . $row['contestant_id'] . "'
+								data-name='" . htmlspecialchars($row['contestant_name'], ENT_QUOTES) . "'
+								data-number='" . $row['contestant_number'] . "'
+								data-contest='" . $row['fk_contestant_contest'] . "'
+								data-category='" . $row['fk_contestant_category'] . "'
+								data-title='" . htmlspecialchars($row['title'], ENT_QUOTES) . "'
+								data-bio='" . htmlspecialchars($row['bio'], ENT_QUOTES) . "'
+								data-gender='" . htmlspecialchars($row['gender'], ENT_QUOTES) . "'
+								onclick='populateEditModal(this)'>
+								Edit
+							</a>";
+						echo "<a href='#' class='btn btn-danger btn-sm' onclick='confirmDeleteContestant(" . $row['contestant_id'] . ")'>Delete</a>";
+						echo "</td>";
+						echo "</tr>";
 					}
-				} else {
-					echo "No record Found";
 				}
-
 				?>
+				</tbody>
 			</table>
 		</div>
 
@@ -375,8 +556,11 @@ include "judge_table_query.php";
 			document.getElementById('edit_contestant_id').value = element.getAttribute('data-id');
 			document.getElementById('edit_contestant_name').value = element.getAttribute('data-name');
 			document.getElementById('edit_contestant_number').value = element.getAttribute('data-number');
+			document.getElementById('edit_contest').value = element.getAttribute('data-contest');
 			document.getElementById('edit_category').value = element.getAttribute('data-category');
-			document.getElementById('edit_description').value = element.getAttribute('data-description');
+			document.getElementById('edit_title').value = element.getAttribute('data-title');
+			document.getElementById('edit_bio').value = element.getAttribute('data-bio');
+			document.getElementById('edit_gender').value = element.getAttribute('data-gender');
 		}
 
 		function populateEditCategoryModal(element) {
