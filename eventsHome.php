@@ -3,8 +3,8 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Contestants - Dress to Impress</title>
-	<link rel="stylesheet" href="contestant.css">
+	<title>User Page</title>
+	<link rel="stylesheet" href="user.css">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -27,56 +27,52 @@
 
 			<!-- User Info -->
 			<a href="#" class="user-info" onclick="goToUserProfile()">
-				<div class="user-avatar">👤</div>
-				<span id="username">Username</span>
+				<div class="user-avatar">��</div>
+				<span id="username">
+					<!-- CONNECT TO DATABASE: Replace this with PHP code to get username from database -->
+					Username
+				</span>
 			</a>
 		</div>
 	</nav>
 
-	<!-- Event Selection Container -->
-	<div class="event-container">
-		<h1>Please select an Event</h1>
-		
-		<a href="event1.php" class="event-button" onclick="goToEvent('roblox')">
-			Roblox: A Night to Remember in Bloxburg
-		</a>
-		
-		<a href="#" class="event-button" onclick="goToEvent('cics')">
-			CICS: Puksaan sa tabi ng dean's office
-		</a>
-		
-		<a href="#" class="event-button" onclick="goToEvent('miss-cainta')">
-			Miss Cainta 2025
-		</a>
-		
-		<a href="#" class="event-button" onclick="goToEvent('pageant')">
-			Gabi ng lagim: Pageant for a Cause (Sponsored by: Meralco)
-		</a>
+	<!-- Your Page Content Goes Here -->
+	<div class="page-content">
+		<h1>Your Page Content</h1>
+		<p>Replace this section with your actual page content.</p>
 	</div>
 
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 	<script>
+		// Function to navigate to home page
 		function goToHome() {
+			// Add your home page URL here
 			console.log('Going to home page');
+			// window.location.href = 'index.html';
 		}
 
+		// Function to navigate to different pages
 		function goToPage(page) {
+			// Add your page URLs here
 			console.log('Going to ' + page + ' page');
+			// Example: window.location.href = page + '.html';
 		}
 
+		// Function to navigate to user profile
 		function goToUserProfile() {
+			// Add your user profile page URL here
 			console.log('Going to user profile');
+			// window.location.href = 'profile.html';
 		}
 
-		function goToEvent(eventType) {
-			console.log('Going to ' + eventType + ' event');
-		}
-
+		// Optional: Add dynamic username update function
 		function updateUsername(newUsername) {
 			document.getElementById('username').textContent = newUsername;
 		}
 	</script>
+
+
 </body>
 </html>

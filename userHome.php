@@ -21,9 +21,9 @@
             <!-- Navigation Links -->
             <div class="navbar-links">
                 <a href="userHome.php" onclick="goToPage('home')">HOME</a>
-                <a href="categoryHome.php" onclick="goToPage('category')">CATEGORY</a>
-                <a href="contestantHome.php" onclick="goToPage('contestants')">CONTESTANTS</a>
+                <a href="eventsHome.php" onclick="goToPage('events')">EVENTS</a>
                 <a href="resultHome.php" onclick="goToPage('results')">RESULTS</a>
+                <a href="contestantHome.php" onclick="goToPage('contestants')">CONTESTANTS</a>
             </div>
 
             <!-- User Info -->
@@ -57,7 +57,7 @@
 		 <p class="subtitle">What would you like to do today?</p>
             
             <div class="action-cards">
-                <a href="#" class="action-card" onclick="goToPage('vote')">
+                <a href="contestantHome.php" class="action-card" onclick="goToPage('vote')">
                     <div class="action-card-icon">📊</div>
                     <div class="action-card-text">Vote</div>
                 </a>
