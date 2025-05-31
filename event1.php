@@ -34,35 +34,38 @@
         <h1>Please select a Category</h1>
         
         <div class="category-grid">
-            <div class="category-card" data-theme="sunny">
+            <a href="category1.php" class="category-card" data-theme="sunny" onclick="goToCategory('sunny')">
                 <div class="category-content">
                     <div class="category-icon">☀️</div>
                     <span>Sunny</span>
                 </div>
-            </div>
+            </a>
             
-            <div class="category-card" data-theme="beach">
+            <a href="#" class="category-card" data-theme="beach" onclick="goToCategory('beach')">
                 <div class="category-content">
                     <div class="category-icon">⛱️</div>
                     <span>Beach</span>
                 </div>
-            </div>
+            </a>
             
-            <div class="category-card" data-theme="school">
+            <a href="#" class="category-card" data-theme="school" onclick="goToCategory('school')">
                 <div class="category-content">
                     <div class="category-icon">🏫</div>
                     <span>School</span>
                 </div>
-            </div>
+            </a>
             
-            <div class="category-card" data-theme="fancy">
+            <a href="#" class="category-card" data-theme="fancy" onclick="goToCategory('fancy')">
                 <div class="category-content">
                     <div class="category-icon">🍷</div>
                     <span>Fancy</span>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         let isAnimationComplete = false;
@@ -109,6 +112,16 @@
         function applyTheme(theme) {
             currentTheme = theme;
             document.body.setAttribute('data-theme', theme);
+        }
+
+        function goToCategory(category) {
+            console.log('Going to ' + category + ' category');
+            // Example: window.location.href = category + '.php';
+        }
+
+        function goToHome() {
+            console.log('Going to home page');
+            window.location.href = 'userHome.php';
         }
     </script>
 </body>
