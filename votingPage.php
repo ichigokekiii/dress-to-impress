@@ -144,7 +144,7 @@
                 <span id="modal-impact">0.00%</span>
             </div>
             <div class="stat-item">
-                <strong>Overall:</strong>
+                <strong>Total Vote:</strong>
                 <strong id="modal-overall">0.00%</strong>
             </div>
         </div>
