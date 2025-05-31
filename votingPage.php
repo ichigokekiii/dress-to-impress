@@ -221,16 +221,8 @@
         }
 
         function confirmVote() {
-            // Here you would typically send the vote to the server
-            Swal.fire({
-                title: 'Vote Submitted!',
-                text: 'Thank you for voting',
-                icon: 'success',
-                confirmButtonColor: '#DF81B3'
-            }).then(() => {
-                // Redirect to results or home page
-                window.location.href = 'resultHome.php';
-            });
+            // Redirect
+            window.location.href = 'confirmVote.php';
         }
 
         function goToHome() {
