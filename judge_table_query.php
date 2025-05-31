@@ -7,7 +7,7 @@ if (isset($_POST['update_judge'])) {
     $judge_name = $_POST['judge_name'];
     $contact_information = $_POST['contact_information'];
 
-    $update_query_judges = "UPDATE Judge SET
+    $update_query_judges = "UPDATE judge_table SET
 					 judge_name = '$judge_name',
 					 contact_information = '$contact_information',
 					 WHERE judge_id = '$judge_id'";
@@ -69,7 +69,7 @@ if (isset($_POST['save_judge'])) {
     $judge_name = $_POST['judge_name'];
     $contact_information = $_POST['contact_information'];
 
-    $insert_query_judge = "INSERT INTO Judge (judge_name, contact_information)
+    $insert_query_judge = "INSERT INTO judge_table (judge_name, contact_information)
                      VALUES ('$judge_name', '$contact_information')";
 
     $result_judge = $conn->query($insert_query_judge);
@@ -89,7 +89,7 @@ if (isset($_POST['save_judge'])) {
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
 
-    $query_judge = "DELETE FROM Judge WHERE judge_id = '$id'";
+    $query_judge = "DELETE FROM judge_table WHERE judge_id = '$id'";
     $result_judge = $conn->query($query_judge);
 
     if ($result_judge) {
