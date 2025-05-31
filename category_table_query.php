@@ -69,6 +69,17 @@ if (isset($_GET['category_success'])) {
                 });
             }
         </script>";
+    } elseif ($_GET['category_error'] == 'in_use') {
+        echo "<script>
+            window.onload = function() {
+                Swal.fire({
+                    title: 'Cannot Delete Category',
+                    text: 'This category is currently being used by one or more contestants. Please reassign or remove those contestants first.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        </script>";
     }
 }
 
@@ -107,7 +118,17 @@ if (isset($_POST['submit'])) {
 <?php ////DELETE
 
 if (isset($_GET['id'])) {
-    $id = $_GET['id'];
+    $id = $conn->real_escape_string($_GET['id']);
+
+    // Check if category is being used by any contestants
+    $check_query = "SELECT COUNT(*) as count FROM contestant_table WHERE fk_contestant_category = '$id'";
+    $check_result = $conn->query($check_query);
+    $row = $check_result->fetch_assoc();
+
+    if ($row['count'] > 0) {
+        header("Location: admin_dashboard.php?page=categories&category_error=in_use");
+        exit();
+    }
 
     $query = "DELETE FROM category_table WHERE category_id = '$id'";
     $result = $conn->query($query);
