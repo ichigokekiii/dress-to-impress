@@ -183,8 +183,14 @@
         // Close modal when clicking outside
         modalOverlay.addEventListener('click', function(e) {
             if (e.target === modalOverlay) {
-                modal.style.display = 'none';
-                modalOverlay.style.display = 'none';
+                modal.classList.remove('active');
+                modalOverlay.classList.remove('active');
+                
+                // Wait for animations to finish before hiding
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    modalOverlay.style.display = 'none';
+                }, 500);
             }
         });
 
@@ -206,6 +212,12 @@
 
             modalOverlay.style.display = 'block';
             modal.style.display = 'block';
+            
+            // Trigger animations
+            setTimeout(() => {
+                modalOverlay.classList.add('active');
+                modal.classList.add('active');
+            }, 10);
         }
 
         function confirmVote() {
