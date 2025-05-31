@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contestants - Dress to Impress</title>
+    <title>Category Selection - Dress to Impress</title>
     <link rel="stylesheet" href="category1.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -19,10 +19,10 @@
 
             <!-- Navigation Links -->
             <div class="navbar-links">
-                <a href="userHome.php" onclick="goToPage('home')">HOME</a>
-                <a href="eventsHome.php" onclick="goToPage('events')">EVENTS</a>
-                <a href="resultHome.php" onclick="goToPage('results')">RESULTS</a>
-                <a href="contestantHome.php" onclick="goToPage('contestants')">CONTESTANTS</a>
+                <a href="userHome.php">HOME</a>
+                <a href="eventsHome.php">EVENTS</a>
+                <a href="resultHome.php">RESULTS</a>
+                <a href="contestantHome.php">CONTESTANTS</a>
             </div>
 
             <!-- User Info -->
@@ -50,7 +50,7 @@
                                  class="contestant-img">
                         </div>
                         <div class="expanded-view">
-                            <img src="https://placehold.co/400x300/DF81B3/FFFFFF/png?text=Nigger ' . $i . '" 
+                            <img src="https://placehold.co/400x300/DF81B3/FFFFFF/png?text=Contestant ' . $i . ' Expanded" 
                                  alt="Contestant ' . $i . ' Expanded" 
                                  class="contestant-img-expanded">
                             <div class="contestant-info">
