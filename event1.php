@@ -12,7 +12,7 @@
     <nav class="navbar">
         <div class="navbar-container">
             <a class="navbar-brand" href="#" onclick="goToHome()">
-                Your Logo
+                <img src="dresstoimpress.png" alt="Dress to Impress Logo" height="55">
             </a>
 
             <div class="navbar-links">

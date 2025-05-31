@@ -13,8 +13,7 @@
         <div class="navbar-container">
             <!-- Logo -->
             <a class="navbar-brand" href="#" onclick="goToHome()">
-                <!-- REPLACE THIS COMMENT WITH YOUR LOGO IMAGE: <img src="your-logo.png" alt="Logo" height="35"> -->
-                Your Logo
+                <img src="dresstoimpress.png" alt="Dress to Impress Logo" height="45">
             </a>
 
             <!-- Navigation Links -->
