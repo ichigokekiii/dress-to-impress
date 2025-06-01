@@ -1,3 +1,6 @@
+/* Import base styles from user.css */
+@import 'event1.css';
+
 /* Base Styles */
 body {
     background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
@@ -17,8 +20,6 @@ body {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     padding: 12px 0;
     height: 60px;
-    width: 100%;
-    margin: 0;
 }
 
 .navbar-container {
@@ -28,7 +29,7 @@ body {
     width: 100%;
     max-width: 1400px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 15px;
 }
 
 .navbar-brand {
@@ -63,7 +64,11 @@ body {
 }
 
 .navbar-links a:hover {
-    color: #1a1a1a !important;
+    color: #DF81B3 !important;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 5px 10px;
+    border-radius: 5px;
+    transform: translateY(-2px);
 }
 
 .user-info {
@@ -83,10 +88,10 @@ body {
 }
 
 .user-avatar {
-    width: 30px;
-    height: 30px;
-    background: rgba(255, 255, 255, 0.2);
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
