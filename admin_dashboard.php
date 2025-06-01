@@ -6,7 +6,8 @@ include "category_table_query.php";
 include "judge_table_query.php";
 
 // Check if user is logged in and is an admin
-if (!isset($_SESSION['user_id']) || $_SESSION['userType'] !== 'Admin') {
+if (!isset($_SESSION['username']) || $_SESSION['userType'] !== 'Admin') {
+	error_log("Access denied to admin dashboard - User: " . ($_SESSION['username'] ?? 'not set') . ", Type: " . ($_SESSION['userType'] ?? 'not set'));
 	header("Location: login.php");
 	exit();
 }

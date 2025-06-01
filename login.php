@@ -44,23 +44,37 @@ if (isset($_POST['submit'])) {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    $_SESSION['username'] = $username;
+    // For debugging
+    error_log("Login attempt - Username: " . $username);
 
     $sql = "SELECT * FROM users_table WHERE username='" . $username . "' AND password='" . $password . "'";
-
     $result = $conn->query($sql);
 
-    if ($result->num_rows == 1) {
-        $field = $result->fetch_assoc();
-        $role = $field['userType'];
-
-        if ($role == "Judge") {
-            header("location: userHome.php");
-        } else if ($role == "Admin") {
-            header("location: admin_dashboard.php");
-        } else if ($role == "Staff") {
-            header("location: staff_dashboard.php");
+    if ($result && $result->num_rows == 1) {
+        $user = $result->fetch_assoc();
+        
+        // Set all necessary session variables
+        $_SESSION['user_id'] = $user['id']; // Make sure your table has an id column
+        $_SESSION['username'] = $username;
+        $_SESSION['userType'] = $user['userType'];
+        
+        error_log("User found - Type: " . $user['userType']); // For debugging
+        
+        if ($user['userType'] == "Admin") {
+            error_log("Redirecting to admin dashboard"); // For debugging
+            header("Location: admin_dashboard.php");
+            exit(); // Important: Add exit after redirect
+        } else if ($user['userType'] == "Judge") {
+            header("Location: userHome.php");
+            exit();
+        } else if ($user['userType'] == "Staff") {
+            header("Location: staff_dashboard.php");
+            exit();
         }
+    } else {
+        error_log("Login failed - Invalid credentials or query error");
+        // You might want to add an error message here
+        $_SESSION['error'] = "Invalid username or password";
     }
 }
 ?>
