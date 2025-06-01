@@ -22,6 +22,7 @@ $categories = $conn->query($category_query);
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,6 +31,7 @@ $categories = $conn->query($category_query);
     <link rel="stylesheet" href="event1.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar">
@@ -55,7 +57,7 @@ $categories = $conn->query($category_query);
     <!-- Category Selection Container -->
     <div class="category-container">
         <h1>Please select a Category</h1>
-        
+
         <div class="category-grid">
             <?php
             // Get categories for this specific contest
@@ -82,53 +84,53 @@ $categories = $conn->query($category_query);
     </div>
 
     <style>
-    .category-container {
-        max-width: 1200px;
-        margin: 40px auto;
-        padding: 20px;
-    }
+        .category-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
 
-    .category-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        padding: 20px;
-    }
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
 
-    .category-card {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 15px;
-        padding: 20px;
-        text-decoration: none;
-        color: white;
-        transition: all 0.3s ease;
-        backdrop-filter: blur(5px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
+        .category-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-    .category-content {
-        text-align: center;
-    }
+        .category-content {
+            text-align: center;
+        }
 
-    .category-icon {
-        font-size: 2em;
-        margin-bottom: 10px;
-    }
+        .category-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
 
-    .category-desc {
-        display: block;
-        margin-top: 8px;
-        font-size: 0.8em;
-        opacity: 0.8;
-    }
+        .category-desc {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
 
-    .no-categories {
-        text-align: center;
-        padding: 40px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 15px;
-        grid-column: 1 / -1;
-    }
+        .no-categories {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            grid-column: 1 / -1;
+        }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -140,7 +142,7 @@ $categories = $conn->query($category_query);
             const hue = Math.floor(Math.random() * 360);
             const saturation = Math.floor(Math.random() * 30) + 40;
             const lightness = Math.floor(Math.random() * 15) + 70;
-            
+
             return `linear-gradient(to bottom, 
                 hsla(${hue}, ${saturation}%, ${lightness}%, 0.4) 0%,
                 hsla(${hue}, ${saturation}%, ${Math.max(lightness - 10, 60)}%, 0.4) 30%,
@@ -150,7 +152,7 @@ $categories = $conn->query($category_query);
 
         document.addEventListener('DOMContentLoaded', function() {
             const cards = document.querySelectorAll('.category-card');
-            
+
             // Handle animation completion for each card
             cards.forEach((card, index) => {
                 // Calculate total delay for each card (animation delay + animation duration)
@@ -189,4 +191,5 @@ $categories = $conn->query($category_query);
         }
     </script>
 </body>
+
 </html>

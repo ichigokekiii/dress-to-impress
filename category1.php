@@ -120,26 +120,26 @@ $contestants = $conn->query($contestant_query);
                     $expanded_img = $contestant['expanded_image'] ? 'uploads/' . $contestant['expanded_image'] : 
                                   "https://placehold.co/400x300/DF81B3/FFFFFF/png?text=Contestant " . $contestant['contestant_number'] . " Expanded";
                     
-                    echo '
+                echo '
                     <a href="votingPage.php?id=' . $contestant['contestant_id'] . '" class="contestant-card" onclick="selectContestant(' . $contestant['contestant_id'] . ')">
-                        <div class="card-content">
-                            <div class="default-view">
+                    <div class="card-content">
+                        <div class="default-view">
                                 <img src="' . htmlspecialchars($profile_img) . '" 
                                      alt="Contestant ' . $contestant['contestant_number'] . '" 
-                                     class="contestant-img">
-                            </div>
-                            <div class="expanded-view">
+                                 class="contestant-img">
+                        </div>
+                        <div class="expanded-view">
                                 <img src="' . htmlspecialchars($expanded_img) . '" 
                                      alt="Contestant ' . $contestant['contestant_number'] . ' Expanded" 
-                                     class="contestant-img-expanded">
-                                <div class="contestant-info">
+                                 class="contestant-img-expanded">
+                            <div class="contestant-info">
                                     <h3>Contestant #' . $contestant['contestant_number'] . '</h3>
                                     <p>' . htmlspecialchars($contestant['contestant_name']) . '</p>
                                     <p class="bio">' . htmlspecialchars($contestant['bio']) . '</p>
-                                </div>
                             </div>
                         </div>
-                    </a>';
+                    </div>
+                </a>';
                 }
             } else {
                 echo '<div class="no-contestants text-white">

@@ -4,7 +4,6 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 include "connection.php";
 
-// Check if user is logged in
 if (!isset($_SESSION['username'])) {
     header("Location: login.php");
     exit();
@@ -23,7 +22,6 @@ if (isset($_POST['update'])) {
                      WHERE category_id = '$category_id'";
 
     if ($conn->query($update_query)) {
-        // Log the update
         $action = $conn->real_escape_string("Updated category '$category_name'");
         $log_query = "INSERT INTO logs_table (action, log_time) VALUES ('$action', NOW())";
         $conn->query($log_query);
@@ -118,7 +116,7 @@ if (isset($_POST['save_category'])) {
         $action = $conn->real_escape_string("Added new category '$category_name'");
         $log_query = "INSERT INTO logs_table (action, log_time) VALUES ('$action', NOW())";
         $conn->query($log_query);
-        
+
         header("Location: " . $_SERVER['HTTP_REFERER'] . "&category_success=added");
         exit();
     } else {

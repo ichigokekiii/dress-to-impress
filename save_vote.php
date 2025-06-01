@@ -2,14 +2,12 @@
 session_start();
 require_once "connection.php";
 
-// Check if user is logged in and is a judge
 if (!isset($_SESSION['username']) || $_SESSION['userType'] !== 'Judge') {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Only judges can submit scores']);
     exit();
 }
 
-// Get POST data
 $data = json_decode(file_get_contents('php://input'), true);
 
 if (!$data || !isset($data['contestantId']) || !isset($data['scores'])) {
@@ -19,10 +17,9 @@ if (!$data || !isset($data['contestantId']) || !isset($data['scores'])) {
 }
 
 try {
-    // Start transaction
+
     $conn->begin_transaction();
 
-    // Get judge ID based on the logged-in username from users_table
     $judge_query = "SELECT j.judge_id 
                    FROM judge_table j 
                    INNER JOIN users_table u ON j.judge_name = u.username 
@@ -34,10 +31,10 @@ try {
     $judge = $judge_result->fetch_assoc();
 
     if (!$judge) {
-        // If no judge record exists, create one
+
         $insert_judge_query = "INSERT INTO judge_table (judge_name, contact_information) VALUES (?, ?)";
         $stmt = $conn->prepare($insert_judge_query);
-        $contact_info = ""; // You can modify this if you want to collect contact info during registration
+        $contact_info = "";
         $stmt->bind_param("ss", $_SESSION['username'], $contact_info);
         $stmt->execute();
         $judge_id = $conn->insert_id;
@@ -45,7 +42,7 @@ try {
         $judge_id = $judge['judge_id'];
     }
 
-    // Check if judge has already voted for this contestant
+ 
     $check_query = "SELECT COUNT(*) as count FROM score_table 
                    WHERE fk_score_judge = ? AND fk_score_contestant = ?";
     $stmt = $conn->prepare($check_query);
@@ -57,7 +54,6 @@ try {
         throw new Exception('You have already voted for this contestant');
     }
 
-    // Insert scores
     $insert_query = "INSERT INTO score_table (fk_score_judge, fk_score_contestant, fk_score_criteria, score_value) 
                      VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($insert_query);
@@ -72,7 +68,7 @@ try {
         $stmt->execute();
     }
 
-    // Log the voting action
+
     $contestant_query = "SELECT contestant_name, contestant_number FROM contestant_table WHERE contestant_id = ?";
     $stmt = $conn->prepare($contestant_query);
     $stmt->bind_param("i", $data['contestantId']);
@@ -85,16 +81,17 @@ try {
     $stmt->bind_param("si", $action, $_SESSION['users_id']);
     $stmt->execute();
 
-    // Commit transaction
     $conn->commit();
 
     echo json_encode(['success' => true]);
 
 } catch (Exception $e) {
-    // Rollback transaction on error
+
     $conn->rollback();
     
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 ?> 
+
+

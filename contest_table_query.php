@@ -2,13 +2,13 @@
 session_start();
 require_once "connection.php";
 
-// Check if user is logged in and is a staff
+
 if (!isset($_SESSION['user_id']) || $_SESSION['userType'] !== 'Staff') {
     header("Location: login.php");
     exit();
 }
 
-// Add Contest
+
 if (isset($_POST['save_contest'])) {
     $contest_name = $conn->real_escape_string($_POST['contest_name']);
     $contest_date = $conn->real_escape_string($_POST['contest_date']);
@@ -27,7 +27,7 @@ if (isset($_POST['save_contest'])) {
     exit();
 }
 
-// Update Contest
+
 if (isset($_POST['update_contest'])) {
     $contest_id = intval($_POST['contest_id']);
     $contest_name = $conn->real_escape_string($_POST['contest_name']);
@@ -48,11 +48,11 @@ if (isset($_POST['update_contest'])) {
     exit();
 }
 
-// Delete Contest
+
 if (isset($_GET['id'])) {
     $contest_id = intval($_GET['id']);
 
-    // Check for related records
+
     $check_query = "SELECT COUNT(*) as count FROM contestant_table WHERE fk_contestant_contest = $contest_id";
     $check_result = $conn->query($check_query);
     $row = $check_result->fetch_assoc();

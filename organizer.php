@@ -500,11 +500,11 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 			<table class="table table-bordered" id="categoryTable">
 				<thead>
 					<tr>
-						<th style="width: 10%;">Category Id</th>
-						<th>Category Name</th>
+					<th style="width: 10%;">Category Id</th>
+					<th>Category Name</th>
 						<th>Contest</th>
 						<th>Description</th>
-						<th style="width: 15%;">Action</th>
+					<th style="width: 15%;">Action</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -525,12 +525,12 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 								data-contest='" . $row['fk_category_contest'] . "'
 								data-description='" . htmlspecialchars($row['category_description'], ENT_QUOTES) . "'
 								onclick='populateEditCategoryModal(this)'>
-								Edit
+										Edit
 							</a>";
 						echo "<a href='#' class='btn btn-danger' onclick='confirmDeleteCategory(" . $row['category_id'] . ")'>Delete</a>";
 						echo "</td>";
 						echo "</tr>";
-					}
+				}
 				}
 				?>
 				</tbody>
@@ -709,17 +709,17 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 			$query_run = $conn->query($query);
 			?>
 			<table class="table table-bordered" id="criteriaTable">
-				<thead>
-					<tr>
+					<thead>
+						<tr>
 						<th>ID</th>
 						<th>Contest</th>
-						<th>Criteria Name</th>
+							<th>Criteria Name</th>
 						<th>Description</th>
 						<th>Max Score</th>
 						<th style="width: 15%;">Action</th>
-					</tr>
-				</thead>
-				<tbody>
+						</tr>
+					</thead>
+					<tbody>
 				<?php
 				if ($query_run) {
 					while ($row = mysqli_fetch_array($query_run)) {
@@ -737,8 +737,8 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 					}
 				}
 				?>
-				</tbody>
-			</table>
+					</tbody>
+				</table>
 
 			<!-- Add Criteria Modal -->
 			<div class="modal fade" id="addCriteriaModal" tabindex="-1">
@@ -783,8 +783,8 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 					</div>
 				</div>
 			</div>
+			</div>
 		</div>
-	</div>
 
 	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

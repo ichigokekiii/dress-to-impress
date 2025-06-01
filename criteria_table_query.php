@@ -2,13 +2,12 @@
 session_start();
 require_once "connection.php";
 
-// Check if user is logged in and has appropriate permissions
 if (!isset($_SESSION['username']) || !in_array($_SESSION['userType'], ['Admin', 'Staff'])) {
     header("Location: login.php");
     exit();
 }
 
-// INSERT
+
 if (isset($_POST['save_criteria'])) {
     $criteria_name = $conn->real_escape_string($_POST['criteria_name']);
     $fk_criteria_contest = $conn->real_escape_string($_POST['fk_criteria_contest']);
@@ -22,7 +21,7 @@ if (isset($_POST['save_criteria'])) {
         $stmt->bind_param("sisi", $criteria_name, $fk_criteria_contest, $criteria_description, $max_score);
         
         if ($stmt->execute()) {
-            // Log the action
+
             if (isset($_SESSION['users_id'])) {
                 $action = "Added new criteria '$criteria_name'";
                 $log_query = "INSERT INTO logs_table (action, log_time, fk_logs_users) VALUES (?, NOW(), ?)";
@@ -39,13 +38,12 @@ if (isset($_POST['save_criteria'])) {
         $_SESSION['error'] = "Error: " . $e->getMessage();
     }
 
-    // Redirect based on user type
     $redirect_page = ($_SESSION['userType'] === 'Admin') ? 'admin_dashboard.php' : 'organizer.php';
     header("Location: $redirect_page?page=criteria");
     exit();
 }
 
-// UPDATE
+
 if (isset($_POST['update_criteria'])) {
     $criteria_id = $conn->real_escape_string($_POST['criteria_id']);
     $criteria_name = $conn->real_escape_string($_POST['criteria_name']);

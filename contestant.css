@@ -13,6 +13,7 @@ body {
     max-width: 800px;
     margin: 40px auto;
     padding: 20px;
+    text-align: center;
 }
 
 .event-container h1 {
@@ -68,6 +69,8 @@ body {
     font-size: 0.8em;
     opacity: 0.7;
     display: block;
+    color: #666;
+    font-size: 0.9em;
 }
 
 .no-events {
@@ -89,6 +92,17 @@ body {
 }
 
 /* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -98,7 +112,68 @@ body {
     }
 }
 
-@keyframes slideUpFade {
+/* Navbar animations */
+.navbar-links a {
+    opacity: 0;
+    animation: slideInRight 0.5s ease forwards;
+}
+
+.navbar-links a:nth-child(1) { animation-delay: 0.1s; }
+.navbar-links a:nth-child(2) { animation-delay: 0.2s; }
+.navbar-links a:nth-child(3) { animation-delay: 0.3s; }
+.navbar-links a:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Event button animations */
+.event-button {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+/* Generate 10 animation delays for up to 10 event buttons */
+.event-button:nth-child(2) { animation-delay: 0.2s; }
+.event-button:nth-child(3) { animation-delay: 0.3s; }
+.event-button:nth-child(4) { animation-delay: 0.4s; }
+.event-button:nth-child(5) { animation-delay: 0.5s; }
+.event-button:nth-child(6) { animation-delay: 0.6s; }
+.event-button:nth-child(7) { animation-delay: 0.7s; }
+.event-button:nth-child(8) { animation-delay: 0.8s; }
+.event-button:nth-child(9) { animation-delay: 0.9s; }
+.event-button:nth-child(10) { animation-delay: 1.0s; }
+
+/* Logo animation */
+.navbar-brand img {
+    opacity: 0;
+    animation: fadeInRotate 0.8s ease forwards;
+}
+
+@keyframes fadeInRotate {
+    from {
+        opacity: 0;
+        transform: rotate(-10deg) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: rotate(0) scale(1);
+    }
+}
+
+/* User info animation */
+.user-info {
+    opacity: 0;
+    animation: fadeInLeft 0.5s ease forwards 0.5s;
+}
+
+@keyframes fadeInLeft {
     from {
         opacity: 0;
         transform: translateY(50px);

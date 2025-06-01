@@ -5,14 +5,12 @@ include "contestant_table_query.php";
 include "category_table_query.php";
 include "judge_table_query.php";
 
-// Check if user is logged in and is an admin
 if (!isset($_SESSION['username']) || $_SESSION['userType'] !== 'Admin') {
 	error_log("Access denied to admin dashboard - User: " . ($_SESSION['username'] ?? 'not set') . ", Type: " . ($_SESSION['userType'] ?? 'not set'));
 	header("Location: login.php");
 	exit();
 }
 
-// Get overview statistics
 $stats = array();
 
 // Total Contestants
@@ -48,11 +46,8 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Admin Dashboard</title>
-	<!-- Bootstrap CSS -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-	<!-- Font Awesome -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-	<!-- Custom CSS -->
 	<link rel="stylesheet" href="style.css">
 </head>
 
@@ -401,11 +396,11 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 			<table class="table table-bordered" id="categoryTable">
 				<thead>
 					<tr>
-						<th style="width: 10%;">Category Id</th>
-						<th>Category Name</th>
+					<th style="width: 10%;">Category Id</th>
+					<th>Category Name</th>
 						<th>Contest</th>
 						<th>Description</th>
-						<th style="width: 15%;">Action</th>
+					<th style="width: 15%;">Action</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -426,12 +421,12 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 								data-contest='" . $row['fk_category_contest'] . "'
 								data-description='" . htmlspecialchars($row['category_description'], ENT_QUOTES) . "'
 								onclick='populateEditCategoryModal(this)'>
-								Edit
+										Edit
 							</a>";
 						echo "<a href='#' class='btn btn-danger' onclick='confirmDeleteCategory(" . $row['category_id'] . ")'>Delete</a>";
 						echo "</td>";
 						echo "</tr>";
-					}
+				}
 				}
 				?>
 				</tbody>
@@ -538,7 +533,6 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 						</tr>
 					</thead>
 					<tbody>
-						<!-- PHP JOINED rows go here -->
 					</tbody>
 				</table>
 			</div>
@@ -558,17 +552,17 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 			$query_run = $conn->query($query);
 			?>
 			<table class="table table-bordered" id="criteriaTable">
-				<thead>
-					<tr>
+					<thead>
+						<tr>
 						<th>ID</th>
 						<th>Contest</th>
-						<th>Criteria Name</th>
+							<th>Criteria Name</th>
 						<th>Description</th>
 						<th>Max Score</th>
 						<th style="width: 15%;">Action</th>
-					</tr>
-				</thead>
-				<tbody>
+						</tr>
+					</thead>
+					<tbody>
 				<?php
 				if ($query_run) {
 					while ($row = mysqli_fetch_array($query_run)) {
@@ -594,8 +588,8 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 					}
 				}
 				?>
-				</tbody>
-			</table>
+					</tbody>
+				</table>
 		</div>
 
 		<!-- Add Criteria Modal -->
@@ -873,8 +867,8 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 			}).then((result) => {
 				if (result.isConfirmed) {
 					window.location.href = 'criteria_table_query.php?id=' + id;
-				}
-			});
+			}
+		});
 		}
 	</script>
 </body>
