@@ -1,3 +1,16 @@
+<?php
+session_start();
+require_once "connection.php";
+
+// Check if user is logged in and is an admin
+if (!isset($_SESSION['username']) || $_SESSION['userType'] !== 'Judge') {
+	error_log("Access denied to admin dashboard - User: " . ($_SESSION['username'] ?? 'not set') . ", Type: " . ($_SESSION['userType'] ?? 'not set'));
+	header("Location: login.php");
+	exit();
+}
+    
+?>
+
 <!DOCTYPE html>
 <html>
 <head>

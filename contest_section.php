@@ -134,7 +134,7 @@ function submitAddContestForm(event) {
     const formData = new FormData(document.getElementById('addContestForm'));
     formData.append('save_contest', '1');
 
-    fetch('organizer_dashboard.php?page=contests', {
+    fetch('contest_handler.php', {
         method: 'POST',
         body: formData
     })
@@ -143,7 +143,8 @@ function submitAddContestForm(event) {
         // Clear form
         document.getElementById('addContestForm').reset();
         // Hide modal
-        $('#addContestModal').modal('hide');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addContestModal'));
+        modal.hide();
         // Show message
         Swal.fire({
             title: data.status === 'success' ? 'Success!' : 'Error!',
@@ -173,7 +174,7 @@ function submitEditContestForm(event) {
     const formData = new FormData(document.getElementById('editContestForm'));
     formData.append('update_contest', '1');
 
-    fetch('organizer_dashboard.php?page=contests', {
+    fetch('contest_handler.php', {
         method: 'POST',
         body: formData
     })
@@ -207,7 +208,7 @@ function submitEditContestForm(event) {
 function confirmDeleteContest(id) {
     Swal.fire({
         title: 'Are you sure?',
-        text: "You won't be able to revert this! All related data will be lost.",
+        text: "You won't be able to revert this!",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
@@ -215,14 +216,14 @@ function confirmDeleteContest(id) {
         confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch(`organizer_dashboard.php?page=contests&delete_contest=${id}`)
+            fetch('contest_handler.php?delete_contest=' + id)
             .then(response => response.json())
             .then(data => {
                 Swal.fire({
                     title: data.status === 'success' ? 'Deleted!' : 'Error!',
                     text: data.message,
                     icon: data.status
-                }).then((result) => {
+                }).then(() => {
                     if (data.status === 'success') {
                         location.reload();
                     }

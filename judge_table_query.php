@@ -1,6 +1,15 @@
-<?php //EDIT
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ob_start();
 include "connection.php";
+
+// Check if user is logged in
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit();
+}
 
 if (isset($_POST['update_judge'])) {
     $judge_id = $_POST['judge_id'];

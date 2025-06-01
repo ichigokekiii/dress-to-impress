@@ -1,3 +1,30 @@
+<?php
+include "connection.php";
+
+if (isset($_POST['submit'])) {
+    session_start();
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    $sql = "SELECT * FROM users_table WHERE username='$username' AND password='$password'";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows == 1) {
+        $user = $result->fetch_assoc();
+        $_SESSION['username'] = $username;
+        $_SESSION['userType'] = $user['userType'];
+        
+        if ($user['userType'] == "Admin") {
+            header("Location: admin_dashboard.php");
+        } else if ($user['userType'] == "Judge") {
+            header("Location: userHome.php");
+        } else if ($user['userType'] == "Staff") {
+            header("Location: organizer.php");
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,33 +58,4 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
-
-<?php
-include "connection.php";
-
-if (isset($_POST['submit'])) {
-    session_start();
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-
-    $_SESSION['username'] = $username;
-
-    $sql = "SELECT * FROM users_table WHERE username='" . $username . "' AND password='" . $password . "'";
-
-    $result = $conn->query($sql);
-
-    if ($result->num_rows == 1) {
-        $field = $result->fetch_assoc();
-        $role = $field['userType'];
-
-        if ($role == "Judge") {
-            header("location: userHome.php");
-        } else if ($role == "Admin") {
-            header("location: admin_dashboard.php");
-        } else if ($role == "Organizer") {
-            header("location: organizer_dashboard.php");
-        }
-    }
-}
-?> 
+</html> 

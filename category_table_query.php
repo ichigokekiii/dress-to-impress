@@ -1,19 +1,37 @@
-<?php //EDIT
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 include "connection.php";
 
+// Check if user is logged in
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit();
+}
+
 if (isset($_POST['update'])) {
-    $category_id = $_POST['category_id'];
-    $category_name = $_POST['category_name'];
+    $category_id = $conn->real_escape_string($_POST['category_id']);
+    $category_name = $conn->real_escape_string($_POST['category_name']);
+    $fk_category_contest = $conn->real_escape_string($_POST['fk_category_contest']);
+    $category_description = $conn->real_escape_string($_POST['category_description']);
 
     $update_query = "UPDATE category_table SET
-                     category_name = '$category_name'
+                     category_name = '$category_name',
+                     fk_category_contest = '$fk_category_contest',
+                     category_description = '$category_description'
                      WHERE category_id = '$category_id'";
 
     if ($conn->query($update_query)) {
-        header("Location: admin_dashboard.php?page=categories&category_success=updated");
+        // Log the update
+        $action = $conn->real_escape_string("Updated category '$category_name'");
+        $log_query = "INSERT INTO logs_table (action, log_time) VALUES ('$action', NOW())";
+        $conn->query($log_query);
+        
+        header("Location: " . $_SERVER['HTTP_REFERER'] . "&category_success=updated");
         exit();
     } else {
-        header("Location: admin_dashboard.php?error=updatefail");
+        header("Location: " . $_SERVER['HTTP_REFERER'] . "&error=updatefail");
         exit();
     }
 }
@@ -62,8 +80,8 @@ if (isset($_GET['category_success'])) {
         echo "<script>
             window.onload = function() {
                 Swal.fire({
-                    title: 'Duplicate ID!',
-                    text: 'The category ID already exists.',
+                    title: 'Error!',
+                    text: 'The category already exists.',
                     icon: 'error',
                     confirmButtonText: 'Try Again'
                 });
@@ -87,29 +105,24 @@ if (isset($_GET['category_success'])) {
 
 <?php //INSERT
 
-if (isset($_POST['submit'])) {
-    
+if (isset($_POST['save_category'])) {
+    $category_name = $conn->real_escape_string($_POST['category_name']);
+    $fk_category_contest = $conn->real_escape_string($_POST['fk_category_contest']);
+    $category_description = $conn->real_escape_string($_POST['category_description']);
 
-    $category_name = $_POST['category_name'];
+    $insert_query = "INSERT INTO category_table (category_name, fk_category_contest, category_description)
+                     VALUES ('$category_name', '$fk_category_contest', '$category_description')";
 
-    $check_query = "SELECT * FROM category_table WHERE category_id = '$category_id'"; // Check for duplicate ID
-    $check_result = mysqli_query($conn, $check_query);
-
-    if ($check_result->num_rows > 0) {
-        header("Location: admin_dashboard.php?category_error=duplicate");
-        exit();
-    }
-
-    $insert_query = "INSERT INTO category_table (category_name)
-                     VALUES ('$category_name')";
-
-    $result = $conn->query($insert_query);
-
-    if (!$result) {
-        header("Location: admin_dashboard.php?category_error=insertfail");
+    if ($conn->query($insert_query)) {
+        // Log the insertion
+        $action = $conn->real_escape_string("Added new category '$category_name'");
+        $log_query = "INSERT INTO logs_table (action, log_time) VALUES ('$action', NOW())";
+        $conn->query($log_query);
+        
+        header("Location: " . $_SERVER['HTTP_REFERER'] . "&category_success=added");
         exit();
     } else {
-        header("Location: admin_dashboard.php?page=categories&category_success=added");
+        header("Location: " . $_SERVER['HTTP_REFERER'] . "&category_error=insertfail");
         exit();
     }
 }
@@ -126,18 +139,28 @@ if (isset($_GET['id'])) {
     $row = $check_result->fetch_assoc();
 
     if ($row['count'] > 0) {
-        header("Location: admin_dashboard.php?page=categories&category_error=in_use");
+        header("Location: " . $_SERVER['HTTP_REFERER'] . "&category_error=in_use");
         exit();
     }
+
+    // Get category info for logging before deletion
+    $info_query = "SELECT category_name FROM category_table WHERE category_id = '$id'";
+    $info_result = $conn->query($info_query);
+    $category = $info_result->fetch_assoc();
 
     $query = "DELETE FROM category_table WHERE category_id = '$id'";
     $result = $conn->query($query);
 
     if ($result) {
-        header("Location: admin_dashboard.php?page=categories&category_success=deleted");
+        // Log the deletion
+        $action = $conn->real_escape_string("Deleted category '" . $category['category_name'] . "'");
+        $log_query = "INSERT INTO logs_table (action, log_time) VALUES ('$action', NOW())";
+        $conn->query($log_query);
+        
+        header("Location: " . $_SERVER['HTTP_REFERER'] . "&category_success=deleted");
         exit();
     } else {
-        header("Location: admin_dashboard.php?error=deletefail");
+        header("Location: " . $_SERVER['HTTP_REFERER'] . "&error=deletefail");
         exit();
     }
 }
@@ -157,16 +180,36 @@ if (isset($_GET['id'])) {
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editCategoryModalLabel">Edit </h5>
+                    <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="admin_dashboard.php" method="POST">
+                    <form action="category_table_query.php" method="POST">
                         <input type="hidden" id="edit_category_id" name="category_id">
                         <div class="row mb-3">
                             <div class="col">
                                 <label for="edit_category_name" class="form-label">Category Name</label>
                                 <input type="text" class="form-control" id="edit_category_name" name="category_name" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="edit_contest" class="form-label">Contest</label>
+                                <select class="form-select" id="edit_contest" name="fk_category_contest" required>
+                                    <?php
+                                    $contest_query = "SELECT contest_id, contest_name FROM contest_table ORDER BY contest_name";
+                                    $contest_result = $conn->query($contest_query);
+                                    while ($contest = $contest_result->fetch_assoc()) {
+                                        echo "<option value='" . $contest['contest_id'] . "'>" . htmlspecialchars($contest['contest_name']) . "</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="edit_category_description" class="form-label">Description</label>
+                                <textarea class="form-control" id="edit_category_description" name="category_description" rows="3"></textarea>
                             </div>
                         </div>
                         <div class="row">
@@ -176,12 +219,10 @@ if (isset($_GET['id'])) {
                             </div>
                         </div>
                     </form>
-
                 </div>
             </div>
         </div>
     </div>
-
 </body>
 
 </html>

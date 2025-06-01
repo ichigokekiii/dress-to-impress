@@ -1,6 +1,48 @@
 <?php
 ob_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 include "connection.php";
+
+// Check if user is logged in
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Create uploads directory if it doesn't exist
+$upload_dir = 'uploads';
+if (!file_exists($upload_dir)) {
+    mkdir($upload_dir, 0777, true);
+}
+
+// Function to handle file upload
+function handleFileUpload($file, $prefix) {
+    global $upload_dir;
+    
+    if ($file['error'] === UPLOAD_ERR_OK) {
+        $tmp_name = $file['tmp_name'];
+        $name = basename($file['name']);
+        $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+        
+        // Only allow certain image formats
+        $allowed = array('jpg', 'jpeg', 'png', 'gif');
+        if (!in_array($extension, $allowed)) {
+            return null;
+        }
+        
+        // Generate unique filename
+        $filename = $prefix . '_' . uniqid() . '.' . $extension;
+        $filepath = $upload_dir . '/' . $filename;
+        
+        // Move file to uploads directory
+        if (move_uploaded_file($tmp_name, $filepath)) {
+            return $filename;
+        }
+    }
+    return null;
+}
 
 // UPDATE
 if (isset($_POST['update_contestant'])) {
@@ -13,6 +55,19 @@ if (isset($_POST['update_contestant'])) {
     $bio = $conn->real_escape_string($_POST['bio']);
     $gender = $conn->real_escape_string($_POST['gender']);
 
+    // Handle image uploads for update
+    $profile_image = isset($_FILES['profile_image']) ? handleFileUpload($_FILES['profile_image'], 'profile') : null;
+    $expanded_image = isset($_FILES['expanded_image']) ? handleFileUpload($_FILES['expanded_image'], 'expanded') : null;
+    
+    // Build image update parts of query
+    $image_updates = "";
+    if ($profile_image) {
+        $image_updates .= ", profile_image = '$profile_image'";
+    }
+    if ($expanded_image) {
+        $image_updates .= ", expanded_image = '$expanded_image'";
+    }
+
     $update_query = "UPDATE contestant_table SET 
         contestant_name = '$contestant_name',
         contestant_number = '$contestant_number',
@@ -21,18 +76,24 @@ if (isset($_POST['update_contestant'])) {
         title = '$title',
         bio = '$bio',
         gender = '$gender'
+        $image_updates
         WHERE contestant_id = '$contestant_id'";
 
     if ($conn->query($update_query)) {
-        // Log the update
-        $action = $conn->real_escape_string("Updated contestant '$contestant_name' (#$contestant_number)");
-        $log_query = "INSERT INTO logs_table (action, log_time) VALUES ('$action', NOW())";
-        $conn->query($log_query);
+        // Log the update if user ID is available
+        if (isset($_SESSION['users_id'])) {
+            $action = $conn->real_escape_string("Updated contestant '$contestant_name' (#$contestant_number)");
+            $log_query = "INSERT INTO logs_table (action, log_time, fk_logs_users) VALUES ('$action', NOW(), " . $_SESSION['users_id'] . ")";
+            $conn->query($log_query);
+        }
 
-        header("Location: admin_dashboard.php?page=contestants&contestant_success=updated");
+        // Redirect based on user type
+        $redirect_page = ($_SESSION['userType'] === 'Admin') ? 'admin_dashboard.php' : 'organizer.php';
+        header("Location: $redirect_page?page=contestants&contestant_success=updated");
         exit();
     } else {
-        header("Location: admin_dashboard.php?error=updatefail");
+        $redirect_page = ($_SESSION['userType'] === 'Admin') ? 'admin_dashboard.php' : 'organizer.php';
+        header("Location: $redirect_page?error=updatefail");
         exit();
     }
 }
@@ -46,7 +107,11 @@ if (isset($_POST['save_contestant'])) {
     $title = $conn->real_escape_string($_POST['title']);
     $bio = $conn->real_escape_string($_POST['bio']);
     $gender = $conn->real_escape_string($_POST['gender']);
-
+    
+    // Handle image uploads
+    $profile_image = isset($_FILES['profile_image']) ? handleFileUpload($_FILES['profile_image'], 'profile') : null;
+    $expanded_image = isset($_FILES['expanded_image']) ? handleFileUpload($_FILES['expanded_image'], 'expanded') : null;
+    
     // Check for duplicate contestant number in the same contest
     $check_query = "SELECT COUNT(*) as count FROM contestant_table 
                    WHERE contestant_number = '$contestant_number' 
@@ -55,50 +120,99 @@ if (isset($_POST['save_contestant'])) {
     $row = $result->fetch_assoc();
     
     if ($row['count'] > 0) {
-        header("Location: admin_dashboard.php?page=contestants&contestant_error=duplicate");
+        $redirect_page = ($_SESSION['userType'] === 'Admin') ? 'admin_dashboard.php' : 'organizer.php';
+        header("Location: $redirect_page?page=contestants&contestant_error=duplicate");
         exit();
     }
 
     $insert_query = "INSERT INTO contestant_table 
-        (contestant_name, contestant_number, fk_contestant_contest, fk_contestant_category, title, bio, gender) 
+        (contestant_name, contestant_number, fk_contestant_contest, fk_contestant_category, title, bio, gender, profile_image, expanded_image) 
         VALUES 
-        ('$contestant_name', '$contestant_number', '$fk_contestant_contest', '$fk_contestant_category', '$title', '$bio', '$gender')";
+        ('$contestant_name', '$contestant_number', '$fk_contestant_contest', '$fk_contestant_category', '$title', '$bio', '$gender', " . ($profile_image ? "'$profile_image'" : "NULL") . ", " . ($expanded_image ? "'$expanded_image'" : "NULL") . ")";
 
     if ($conn->query($insert_query)) {
-        // Log the insertion
-        $action = $conn->real_escape_string("Added contestant '$contestant_name' (#$contestant_number)");
-        $log_query = "INSERT INTO logs_table (action, log_time) VALUES ('$action', NOW())";
-        $conn->query($log_query);
+        // Log the insertion if user ID is available
+        if (isset($_SESSION['users_id'])) {
+            $action = $conn->real_escape_string("Added contestant '$contestant_name' (#$contestant_number)");
+            $log_query = "INSERT INTO logs_table (action, log_time, fk_logs_users) VALUES ('$action', NOW(), " . $_SESSION['users_id'] . ")";
+            $conn->query($log_query);
+        }
 
-        header("Location: admin_dashboard.php?page=contestants&contestant_success=added");
+        // Redirect based on user type
+        $redirect_page = ($_SESSION['userType'] === 'Admin') ? 'admin_dashboard.php' : 'organizer.php';
+        header("Location: $redirect_page?page=contestants&contestant_success=added");
         exit();
     } else {
-        header("Location: admin_dashboard.php?contestant_error=insertfail");
+        $redirect_page = ($_SESSION['userType'] === 'Admin') ? 'admin_dashboard.php' : 'organizer.php';
+        header("Location: $redirect_page?contestant_error=insertfail");
         exit();
     }
 }
 
 // DELETE
 if (isset($_GET['id'])) {
-    $id = $conn->real_escape_string($_GET['id']);
-
-    // Get contestant info for logging before deletion
-    $info_query = "SELECT contestant_name, contestant_number FROM contestant_table WHERE contestant_id = '$id'";
-    $info_result = $conn->query($info_query);
-    $contestant = $info_result->fetch_assoc();
-    
-    $delete_query = "DELETE FROM contestant_table WHERE contestant_id = '$id'";
-
-    if ($conn->query($delete_query)) {
-        // Log the deletion
-        $action = $conn->real_escape_string("Deleted contestant '" . $contestant['contestant_name'] . "' (#" . $contestant['contestant_number'] . ")");
-        $log_query = "INSERT INTO logs_table (action, log_time) VALUES ('$action', NOW())";
-        $conn->query($log_query);
-
-        header("Location: admin_dashboard.php?page=contestants&contestant_success=deleted");
+    // Double check session
+    if (!isset($_SESSION['username']) || !isset($_SESSION['userType'])) {
+        header("Location: login.php");
         exit();
-    } else {
-        header("Location: admin_dashboard.php?error=deletefail");
+    }
+
+    $id = intval($_GET['id']);
+    
+    try {
+        // Start transaction
+        $conn->begin_transaction();
+        
+        // First delete any related scores
+        $delete_scores = "DELETE FROM score_table WHERE fk_score_contestant = ?";
+        $stmt = $conn->prepare($delete_scores);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        
+        // Then delete the contestant
+        $delete_query = "DELETE FROM contestant_table WHERE contestant_id = ?";
+        $stmt = $conn->prepare($delete_query);
+        $stmt->bind_param("i", $id);
+        
+        if ($stmt->execute()) {
+            // Get the maximum ID after deletion
+            $max_id_query = "SELECT MAX(contestant_id) as max_id FROM contestant_table";
+            $result = $conn->query($max_id_query);
+            $max_id = ($result->fetch_assoc())['max_id'] ?? 0;
+            
+            // Reset auto-increment to max_id + 1
+            $reset_auto_increment = "ALTER TABLE contestant_table AUTO_INCREMENT = " . ($max_id + 1);
+            $conn->query($reset_auto_increment);
+            
+            // Commit transaction
+            $conn->commit();
+            
+            // Set session flag for success message
+            $_SESSION['delete_success'] = true;
+            
+            // Redirect based on user type with session preservation
+            if ($_SESSION['userType'] == 'Admin') {
+                header("Location: admin_dashboard.php?page=contestants");
+            } else {
+                header("Location: organizer.php?page=contestants");
+            }
+            exit();
+        } else {
+            throw new Exception($conn->error);
+        }
+    } catch (Exception $e) {
+        // Rollback transaction
+        $conn->rollback();
+        
+        // Set session flag for error message
+        $_SESSION['delete_error'] = $e->getMessage();
+        
+        // Redirect based on user type
+        if ($_SESSION['userType'] == 'Admin') {
+            header("Location: admin_dashboard.php?page=contestants");
+        } else {
+            header("Location: organizer.php?page=contestants");
+        }
         exit();
     }
 }

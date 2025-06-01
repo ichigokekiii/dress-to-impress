@@ -1,14 +1,44 @@
 <?php
 session_start();
 require_once "connection.php";
-include "contestant_table_query.php";
-include "category_table_query.php";
-include "judge_table_query.php";
+require_once "contestant_table_query.php";
+require_once "category_table_query.php";
+require_once "judge_table_query.php";
 
 // Check if user is logged in and is an admin
-if (!isset($_SESSION['user_id']) || $_SESSION['userType'] !== 'Staff') {
+if (!isset($_SESSION['username']) || $_SESSION['userType'] !== 'Staff') {
+	error_log("Access denied to admin dashboard - User: " . ($_SESSION['username'] ?? 'not set') . ", Type: " . ($_SESSION['userType'] ?? 'not set'));
 	header("Location: login.php");
 	exit();
+}
+
+// Add this near the top of the file, after session_start()
+if (isset($_SESSION['delete_success'])) {
+	echo "<script>
+		window.onload = function() {
+			Swal.fire({
+				title: 'Deleted!',
+				text: 'The contestant has been deleted.',
+				icon: 'success',
+				confirmButtonText: 'OK'
+			});
+		}
+	</script>";
+	unset($_SESSION['delete_success']);
+}
+
+if (isset($_SESSION['delete_error'])) {
+	echo "<script>
+		window.onload = function() {
+			Swal.fire({
+				title: 'Error!',
+				text: 'Failed to delete contestant: " . addslashes($_SESSION['delete_error']) . "',
+				icon: 'error',
+				confirmButtonText: 'OK'
+			});
+		}
+	</script>";
+	unset($_SESSION['delete_error']);
 }
 
 // Handle Contest Operations
@@ -249,7 +279,7 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 						</div>
 						<div class="modal-body">
-							<form action="contestant_table_query.php" method="POST">
+							<form action="contestant_table_query.php" method="POST" enctype="multipart/form-data">
 								<div class="row mb-3">
 									<div class="col">
 										<label for="contestant_name" class="form-label">Contestant Name</label>
@@ -309,6 +339,20 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 											<option value="Male">Male</option>
 											<option value="Female">Female</option>
 										</select>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<div class="col">
+										<label for="profile_image" class="form-label">Profile Image</label>
+										<input type="file" class="form-control" id="profile_image" name="profile_image" accept="image/*">
+										<small class="text-muted">Recommended size: 200x200 pixels</small>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<div class="col">
+										<label for="expanded_image" class="form-label">Expanded Image</label>
+										<input type="file" class="form-control" id="expanded_image" name="expanded_image" accept="image/*">
+										<small class="text-muted">Recommended size: 400x300 pixels</small>
 									</div>
 								</div>
 								<div class="row mt-4">
@@ -392,22 +436,41 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 				<div class="modal-dialog">
 					<div class="modal-content">
 						<div class="modal-header">
-							<h5 class="modal-title" id="addContestantModalLabel">Add Category</h5>
+							<h5 class="modal-title" id="addCategoryModalLabel">Add Category</h5>
 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 						</div>
 						<div class="modal-body">
-							<form action="admin_dashboard.php" method="POST">
-								<div class="row">
+							<form action="category_table_query.php" method="POST">
+								<div class="row mb-3">
 									<div class="col">
 										<label for="category_name" class="form-label">Category Name</label>
 										<input type="text" class="form-control" id="category_name" name="category_name" required>
 									</div>
 								</div>
-
+								<div class="row mb-3">
+									<div class="col">
+										<label for="contest" class="form-label">Contest</label>
+										<select class="form-select" id="contest" name="fk_category_contest" required>
+											<?php
+											$contest_query = "SELECT contest_id, contest_name FROM contest_table ORDER BY contest_name";
+											$contest_result = $conn->query($contest_query);
+											while ($contest = $contest_result->fetch_assoc()) {
+												echo "<option value='" . $contest['contest_id'] . "'>" . htmlspecialchars($contest['contest_name']) . "</option>";
+											}
+											?>
+										</select>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<div class="col">
+										<label for="category_description" class="form-label">Description</label>
+										<textarea class="form-control" id="category_description" name="category_description" rows="3"></textarea>
+									</div>
+								</div>
 								<div class="row mt-4">
 									<div class="col text-end">
 										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-										<button type="submit" class="btn btn-primary" name="submit">Save Category</button>
+										<button type="submit" class="btn btn-primary" name="save_category">Save Category</button>
 									</div>
 								</div>
 							</form>
@@ -418,46 +481,99 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 			<input type="text" class="form-control search-box" placeholder="Search Category..." onkeyup="searchTable('categoryTable', this.value)">
 
 			<?php
-			$query = "SELECT * FROM category_table";
+			$query = "SELECT c.*, ct.contest_name 
+					  FROM category_table c
+					  LEFT JOIN contest_table ct ON c.fk_category_contest = ct.contest_id
+					  ORDER BY ct.contest_name, c.category_name";
 			$query_run = $conn->query($query);
 			?>
 			<table class="table table-bordered" id="categoryTable">
 				<thead>
-					<th style="width: 10%;">Category Id</th>
-					<th>Category Name</th>
-					<th style="width: 15%;">Action</th>
+					<tr>
+						<th style="width: 10%;">Category Id</th>
+						<th>Category Name</th>
+						<th>Contest</th>
+						<th>Description</th>
+						<th style="width: 15%;">Action</th>
+					</tr>
 				</thead>
-
+				<tbody>
 				<?php
-
 				if ($query_run) {
 					while ($row = mysqli_fetch_array($query_run)) {
-				?>
-						<tbody>
-							<tr>
-								<td><?php echo $row['category_id']; ?></td>
-								<td><?php echo $row['category_name']; ?></td>
-								<td class="">
-									<a href="#" class="btn btn-success"
-										data-bs-toggle="modal"
-										data-bs-target="#editCategoryModal"
-										data-id="<?php echo $row['category_id']; ?>"
-										data-name="<?php echo $row['category_name']; ?>"
-										onclick="populateEditCategoryModal(this)">
-										Edit
-									</a>
-									<a href="#" class="btn btn-danger" onclick="confirmDeleteCategory(<?php echo $row['category_id']; ?>)">Delete</a>
-								</td>
-							</tr>
-						</tbody>
-				<?php
+						echo "<tr>";
+						echo "<td>" . $row['category_id'] . "</td>";
+						echo "<td>" . htmlspecialchars($row['category_name']) . "</td>";
+						echo "<td>" . htmlspecialchars($row['contest_name']) . "</td>";
+						echo "<td>" . htmlspecialchars($row['category_description']) . "</td>";
+						echo "<td class=''>";
+						echo "<a href='#' class='btn btn-success'
+								data-bs-toggle='modal'
+								data-bs-target='#editCategoryModal'
+								data-id='" . $row['category_id'] . "'
+								data-name='" . htmlspecialchars($row['category_name'], ENT_QUOTES) . "'
+								data-contest='" . $row['fk_category_contest'] . "'
+								data-description='" . htmlspecialchars($row['category_description'], ENT_QUOTES) . "'
+								onclick='populateEditCategoryModal(this)'>
+								Edit
+							</a>";
+						echo "<a href='#' class='btn btn-danger' onclick='confirmDeleteCategory(" . $row['category_id'] . ")'>Delete</a>";
+						echo "</td>";
+						echo "</tr>";
 					}
-				} else {
-					echo "No record Found";
 				}
-
 				?>
+				</tbody>
 			</table>
+		</div>
+
+		<!-- Edit Category Modal -->
+		<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<form action="category_table_query.php" method="POST">
+							<input type="hidden" id="edit_category_id" name="category_id">
+							<div class="row mb-3">
+								<div class="col">
+									<label for="edit_category_name" class="form-label">Category Name</label>
+									<input type="text" class="form-control" id="edit_category_name" name="category_name" required>
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col">
+									<label for="edit_contest" class="form-label">Contest</label>
+									<select class="form-select" id="edit_contest" name="fk_category_contest" required>
+										<?php
+										$contest_query = "SELECT contest_id, contest_name FROM contest_table ORDER BY contest_name";
+										$contest_result = $conn->query($contest_query);
+										while ($contest = $contest_result->fetch_assoc()) {
+											echo "<option value='" . $contest['contest_id'] . "'>" . htmlspecialchars($contest['contest_name']) . "</option>";
+										}
+										?>
+									</select>
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col">
+									<label for="edit_category_description" class="form-label">Description</label>
+									<textarea class="form-control" id="edit_category_description" name="category_description" rows="3"></textarea>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col text-end">
+									<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+									<button type="submit" class="btn btn-primary" name="update">Update</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
 		</div>
 
 		<!-- Judges -->
@@ -616,6 +732,8 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 		function populateEditCategoryModal(element) {
 			document.getElementById('edit_category_id').value = element.getAttribute('data-id');
 			document.getElementById('edit_category_name').value = element.getAttribute('data-name');
+			document.getElementById('edit_contest').value = element.getAttribute('data-contest');
+			document.getElementById('edit_category_description').value = element.getAttribute('data-description');
 		}
 		function populateEditJudgeModal(element) {
 			document.getElementById('edit_judge_id').value = element.getAttribute('data-id');

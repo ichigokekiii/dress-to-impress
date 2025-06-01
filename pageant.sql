@@ -30,7 +30,7 @@ CREATE TABLE `category_table` (
   PRIMARY KEY (`category_id`),
   KEY `contest_id_idx` (`fk_category_contest`),
   CONSTRAINT `contest_id` FOREIGN KEY (`fk_category_contest`) REFERENCES `contest_table` (`contest_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='		';
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -119,7 +119,7 @@ CREATE TABLE `criteria_table` (
   PRIMARY KEY (`criteria_id`),
   KEY `fk_criteria_contest_idx` (`fk_criteria_contest`),
   CONSTRAINT `fk_criteria_contest` FOREIGN KEY (`fk_criteria_contest`) REFERENCES `contest_table` (`contest_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='	';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -174,7 +174,7 @@ CREATE TABLE `logs_table` (
   PRIMARY KEY (`log_id`),
   KEY `fk_logs_users_idx` (`fk_logs_users`),
   CONSTRAINT `fk_logs_users` FOREIGN KEY (`fk_logs_users`) REFERENCES `users_table` (`users_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -183,7 +183,7 @@ CREATE TABLE `logs_table` (
 
 LOCK TABLES `logs_table` WRITE;
 /*!40000 ALTER TABLE `logs_table` DISABLE KEYS */;
-INSERT INTO `logs_table` VALUES (1,1,'Deleted contest: Binibining Infanta','2025-05-28 22:13:25'),(2,1,'Deleted contestant \' from contest \'','2025-05-28 22:34:07'),(3,1,'Added contestant \'Remiel\' to contest \'Binibining Infanta\'','2025-05-28 22:38:11'),(4,1,'Deleted contestant \'Remiel\' from contest \'Binibining Infanta\'','2025-05-28 22:38:30'),(5,1,'Deleted contestant \'Remiel\' from contest \'Binibining Infanta\'','2025-05-28 22:44:13'),(6,1,'Deleted contest: Binibining Infanta','2025-05-28 23:00:21'),(7,1,'User logged out','2025-05-29 07:53:45'),(8,2,'User logged in','2025-05-29 07:54:02'),(9,2,'User logged out','2025-05-29 07:57:43'),(10,2,'User logged in','2025-05-29 08:12:04'),(11,2,'User logged out','2025-05-29 08:14:40'),(12,1,'User logged in','2025-05-29 08:14:46'),(13,1,'User logged out','2025-05-29 08:15:40'),(14,1,'User logged in','2025-05-29 08:15:50'),(15,1,'User logged out','2025-05-29 08:16:04'),(16,1,'User logged in','2025-05-29 08:16:09'),(17,1,'Created new contest: Binibining Infanta','2025-05-29 08:16:57'),(18,1,'Added contestant \'Remiel\' to contest \'Binibining Infanta\'','2025-05-29 08:22:45'),(19,1,'Created new contest: Cainta Beauty','2025-05-29 08:23:23'),(20,1,'Added contestant \'Matt\' to contest \'Cainta Beauty\'','2025-05-29 08:24:52'),(21,1,'User logged out','2025-05-29 10:14:50'),(22,2,'User logged in','2025-05-29 10:14:56'),(23,2,'User logged out','2025-05-29 10:22:02'),(24,1,'User logged in','2025-05-29 10:22:07'),(25,1,'User logged out','2025-05-29 10:45:59'),(26,1,'User logged in','2025-05-29 11:24:18'),(27,1,'User logged out','2025-05-29 12:01:57'),(28,3,'User logged in','2025-05-29 12:02:05'),(29,3,'User logged out','2025-05-29 12:02:20'),(30,2,'User logged in','2025-05-29 12:02:34'),(31,2,'User logged out','2025-05-29 12:08:16'),(32,1,'User logged in','2025-05-29 12:08:21'),(33,1,'Added category \'asdsadasdas\' to contest \'Cainta Beauty\'','2025-05-29 12:32:39'),(34,1,'User logged out','2025-05-29 12:39:41'),(35,3,'User logged in','2025-05-29 12:39:48'),(36,3,'User logged out','2025-05-29 12:40:06'),(37,4,'User logged in','2025-05-29 12:40:30'),(38,4,'User logged out','2025-05-30 13:04:18'),(39,1,'User logged in','2025-05-30 13:05:17'),(40,1,'Created new contest: Manila Pageantry','2025-05-30 13:40:05'),(41,1,'Added contestant \'John \' (#5) to contest \'Binibining Infanta\'','2025-05-30 14:06:40'),(42,1,'Added contestant \'Maria Victoria del Rosario\' (#33) to contest \'Cainta Beauty\'','2025-05-30 14:07:07'),(43,1,'Deleted contestant \'Maria Victoria del Rosario\' (#33) from contest \'Cainta Beauty\'','2025-05-30 14:07:25'),(44,1,'Added contestant \'jkbh\' (#69) to contest \'Binibining Infanta\'','2025-05-30 15:01:18'),(45,1,'Added contestant \'asdad\' (#7) to contest \'Binibining Infanta\'','2025-05-30 15:22:38'),(46,1,'Deleted contestant \'Remiel\' (#1) from contest \'Binibining Infanta\'','2025-05-30 15:27:30'),(47,1,'Deleted contestant \'jkbh\' (#69) from contest \'Binibining Infanta\'','2025-05-30 15:27:38');
+INSERT INTO `logs_table` VALUES (48,1,'User logged in','2025-05-31 22:52:36'),(49,2,'User logged in','2025-05-31 23:08:04'),(50,2,'Submitted votes for contestant 1','2025-05-31 23:24:49');
 /*!40000 ALTER TABLE `logs_table` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -221,6 +221,34 @@ LOCK TABLES `score_table` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `scores_table`
+--
+
+DROP TABLE IF EXISTS `scores_table`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `scores_table` (
+  `score_id` int(11) NOT NULL AUTO_INCREMENT,
+  `fk_score_judge` int(11) DEFAULT NULL,
+  `fk_score_contestant` int(11) DEFAULT NULL,
+  `fk_score_criteria` int(11) DEFAULT NULL,
+  `score_value` decimal(10,0) DEFAULT NULL,
+  `remarks` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`score_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `scores_table`
+--
+
+LOCK TABLES `scores_table` WRITE;
+/*!40000 ALTER TABLE `scores_table` DISABLE KEYS */;
+INSERT INTO `scores_table` VALUES (1,2,1,NULL,0,NULL),(2,2,1,NULL,0,NULL),(3,2,1,NULL,0,NULL),(4,2,1,NULL,0,NULL);
+/*!40000 ALTER TABLE `scores_table` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `users_table`
 --
 
@@ -242,7 +270,7 @@ CREATE TABLE `users_table` (
 
 LOCK TABLES `users_table` WRITE;
 /*!40000 ALTER TABLE `users_table` DISABLE KEYS */;
-INSERT INTO `users_table` VALUES (1,'admin','202cb962ac59075b964b07152d234b70','Admin'),(2,'judge','123','Judge'),(3,'judge123','123','Judge'),(4,'staff','202cb962ac59075b964b07152d234b70','Staff');
+INSERT INTO `users_table` VALUES (1,'admin','123','Admin'),(2,'judge','123','Judge'),(3,'judge123','123','Judge'),(4,'staff','123','Staff');
 /*!40000 ALTER TABLE `users_table` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -255,4 +283,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-05-31 21:15:39
+-- Dump completed on 2025-06-01 18:54:38
