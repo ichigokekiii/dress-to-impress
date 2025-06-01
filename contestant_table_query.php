@@ -58,6 +58,7 @@ if (isset($_POST['update_contestant'])) {
     // Handle image uploads for update
     $profile_image = isset($_FILES['profile_image']) ? handleFileUpload($_FILES['profile_image'], 'profile') : null;
     $expanded_image = isset($_FILES['expanded_image']) ? handleFileUpload($_FILES['expanded_image'], 'expanded') : null;
+    $voting_image = isset($_FILES['voting_image']) ? handleFileUpload($_FILES['voting_image'], 'voting') : null;
     
     // Build image update parts of query
     $image_updates = "";
@@ -66,6 +67,9 @@ if (isset($_POST['update_contestant'])) {
     }
     if ($expanded_image) {
         $image_updates .= ", expanded_image = '$expanded_image'";
+    }
+    if ($voting_image) {
+        $image_updates .= ", voting_image = '$voting_image'";
     }
 
     $update_query = "UPDATE contestant_table SET 
@@ -111,6 +115,7 @@ if (isset($_POST['save_contestant'])) {
     // Handle image uploads
     $profile_image = isset($_FILES['profile_image']) ? handleFileUpload($_FILES['profile_image'], 'profile') : null;
     $expanded_image = isset($_FILES['expanded_image']) ? handleFileUpload($_FILES['expanded_image'], 'expanded') : null;
+    $voting_image = isset($_FILES['voting_image']) ? handleFileUpload($_FILES['voting_image'], 'voting') : null;
     
     // Check for duplicate contestant number in the same contest
     $check_query = "SELECT COUNT(*) as count FROM contestant_table 
@@ -126,9 +131,12 @@ if (isset($_POST['save_contestant'])) {
     }
 
     $insert_query = "INSERT INTO contestant_table 
-        (contestant_name, contestant_number, fk_contestant_contest, fk_contestant_category, title, bio, gender, profile_image, expanded_image) 
+        (contestant_name, contestant_number, fk_contestant_contest, fk_contestant_category, title, bio, gender, profile_image, expanded_image, voting_image) 
         VALUES 
-        ('$contestant_name', '$contestant_number', '$fk_contestant_contest', '$fk_contestant_category', '$title', '$bio', '$gender', " . ($profile_image ? "'$profile_image'" : "NULL") . ", " . ($expanded_image ? "'$expanded_image'" : "NULL") . ")";
+        ('$contestant_name', '$contestant_number', '$fk_contestant_contest', '$fk_contestant_category', '$title', '$bio', '$gender', " 
+        . ($profile_image ? "'$profile_image'" : "NULL") . ", " 
+        . ($expanded_image ? "'$expanded_image'" : "NULL") . ", "
+        . ($voting_image ? "'$voting_image'" : "NULL") . ")";
 
     if ($conn->query($insert_query)) {
         // Log the insertion if user ID is available
@@ -356,6 +364,28 @@ if (isset($_GET['contestant_success'])) {
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>
                                 </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="edit_profile_image" class="form-label">Profile Image</label>
+                                <input type="file" class="form-control" id="edit_profile_image" name="profile_image" accept="image/*">
+                                <small class="text-muted">Recommended size: 200x200 pixels</small>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="edit_expanded_image" class="form-label">Expanded Image</label>
+                                <input type="file" class="form-control" id="edit_expanded_image" name="expanded_image" accept="image/*">
+                                <small class="text-muted">Recommended size: 400x300 pixels</small>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="edit_voting_image" class="form-label">Voting Image</label>
+                                <input type="file" class="form-control" id="edit_voting_image" name="voting_image" accept="image/*">
+                                <small class="text-muted">Recommended size: 800x1000 pixels (Full body photo)</small>
                             </div>
                         </div>
 

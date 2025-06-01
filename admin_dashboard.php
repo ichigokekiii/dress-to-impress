@@ -48,9 +48,12 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Admin Dashboard</title>
-	<link rel="stylesheet" href="style.css">
+	<!-- Bootstrap CSS -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<!-- Font Awesome -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -247,6 +250,20 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 											<option value="Male">Male</option>
 											<option value="Female">Female</option>
 										</select>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<div class="col">
+										<label for="expanded_image" class="form-label">Expanded Image</label>
+										<input type="file" class="form-control" id="expanded_image" name="expanded_image" accept="image/*">
+										<small class="text-muted">Recommended size: 400x300 pixels</small>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<div class="col">
+										<label for="voting_image" class="form-label">Voting Image</label>
+										<input type="file" class="form-control" id="voting_image" name="voting_image" accept="image/*">
+										<small class="text-muted">Recommended size: 800x1000 pixels (Full body photo)</small>
 									</div>
 								</div>
 								<div class="row mt-4">
@@ -530,20 +547,153 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 		<!-- Criteria -->
 		<div id="criteria" class="d-none">
 			<h2>Criteria Table</h2>
-			<button class="btn btn-primary mb-2">Add Criteria</button>
-			<input type="text" class="form-control search-box" placeholder="Search Criteria..." onkeyup="searchTable('criteria-table', this.value)">
-			<div class="table-container">
-				<table class="table table-bordered" id="criteria-table">
-					<thead>
-						<tr>
-							<th>Criteria Name</th>
-							<th>Weight</th>
-						</tr>
-					</thead>
-					<tbody>
-						<!-- PHP-rows go here -->
-					</tbody>
-				</table>
+			<button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addCriteriaModal">Add Criteria</button>
+			<input type="text" class="form-control search-box mb-3" placeholder="Search Criteria..." onkeyup="searchTable('criteriaTable', this.value)">
+			
+			<?php
+			$query = "SELECT c.*, ct.contest_name 
+					  FROM criteria_table c
+					  LEFT JOIN contest_table ct ON c.fk_criteria_contest = ct.contest_id
+					  ORDER BY ct.contest_name, c.criteria_name";
+			$query_run = $conn->query($query);
+			?>
+			<table class="table table-bordered" id="criteriaTable">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Contest</th>
+						<th>Criteria Name</th>
+						<th>Description</th>
+						<th>Max Score</th>
+						<th style="width: 15%;">Action</th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php
+				if ($query_run) {
+					while ($row = mysqli_fetch_array($query_run)) {
+						echo "<tr>";
+						echo "<td>" . $row['criteria_id'] . "</td>";
+						echo "<td>" . htmlspecialchars($row['contest_name']) . "</td>";
+						echo "<td>" . htmlspecialchars($row['criteria_name']) . "</td>";
+						echo "<td>" . htmlspecialchars($row['criteria_description']) . "</td>";
+						echo "<td>" . $row['max_score'] . "</td>";
+						echo "<td>";
+						echo "<a href='#' class='btn btn-success btn-sm me-1'
+								data-bs-toggle='modal'
+								data-bs-target='#editCriteriaModal'
+								data-id='" . $row['criteria_id'] . "'
+								data-name='" . htmlspecialchars($row['criteria_name'], ENT_QUOTES) . "'
+								data-contest='" . $row['fk_criteria_contest'] . "'
+								data-description='" . htmlspecialchars($row['criteria_description'], ENT_QUOTES) . "'
+								data-max-score='" . $row['max_score'] . "'
+								onclick='populateEditCriteriaModal(this)'>Edit</a>";
+						echo "<a href='#' class='btn btn-danger btn-sm' onclick='confirmDeleteCriteria(" . $row['criteria_id'] . ")'>Delete</a>";
+						echo "</td>";
+						echo "</tr>";
+					}
+				}
+				?>
+				</tbody>
+			</table>
+		</div>
+
+		<!-- Add Criteria Modal -->
+		<div class="modal fade" id="addCriteriaModal" tabindex="-1" aria-labelledby="addCriteriaModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="addCriteriaModalLabel">Add Criteria</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<form action="criteria_table_query.php" method="POST">
+							<div class="mb-3">
+								<label for="criteria_name" class="form-label">Criteria Name</label>
+								<input type="text" class="form-control" id="criteria_name" name="criteria_name" required>
+							</div>
+							<div class="mb-3">
+								<label for="contest" class="form-label">Contest</label>
+								<select class="form-select" id="contest" name="fk_criteria_contest" required>
+									<?php
+									$contest_query = "SELECT contest_id, contest_name FROM contest_table ORDER BY contest_name";
+									$contest_result = $conn->query($contest_query);
+									while ($contest = $contest_result->fetch_assoc()) {
+										echo "<option value='" . $contest['contest_id'] . "'>" . htmlspecialchars($contest['contest_name']) . "</option>";
+									}
+									?>
+								</select>
+							</div>
+							<div class="mb-3">
+								<label for="criteria_description" class="form-label">Description</label>
+								<textarea class="form-control" id="criteria_description" name="criteria_description" rows="3"></textarea>
+							</div>
+							<div class="mb-3">
+								<label for="max_score" class="form-label">Maximum Score</label>
+								<input type="number" class="form-control" id="max_score" name="max_score" min="1" max="100" value="100" required>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+								<button type="submit" class="btn btn-primary" name="save_criteria">Save Criteria</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Edit Criteria Modal -->
+		<div class="modal fade" id="editCriteriaModal" tabindex="-1" aria-labelledby="editCriteriaModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="editCriteriaModalLabel">Edit Criteria</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<form action="criteria_table_query.php" method="POST">
+							<input type="hidden" id="edit_criteria_id" name="criteria_id">
+							<div class="row mb-3">
+								<div class="col">
+									<label for="edit_criteria_name" class="form-label">Criteria Name</label>
+									<input type="text" class="form-control" id="edit_criteria_name" name="criteria_name" required>
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col">
+									<label for="edit_contest" class="form-label">Contest</label>
+									<select class="form-select" id="edit_contest" name="fk_criteria_contest" required>
+										<?php
+										$contest_query = "SELECT contest_id, contest_name FROM contest_table ORDER BY contest_name";
+										$contest_result = $conn->query($contest_query);
+										while ($contest = $contest_result->fetch_assoc()) {
+											echo "<option value='" . $contest['contest_id'] . "'>" . htmlspecialchars($contest['contest_name']) . "</option>";
+										}
+										?>
+									</select>
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col">
+									<label for="edit_criteria_description" class="form-label">Description</label>
+									<textarea class="form-control" id="edit_criteria_description" name="criteria_description" rows="3"></textarea>
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col">
+									<label for="edit_max_score" class="form-label">Maximum Score</label>
+									<input type="number" class="form-control" id="edit_max_score" name="max_score" min="1" max="100" required>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col text-end">
+									<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+									<button type="submit" class="btn btn-primary" name="update_criteria">Update</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
 			</div>
 		</div>
 
@@ -560,7 +710,62 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 		</div>
 	</div>
 
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			// Initialize all Bootstrap modals
+			const modals = document.querySelectorAll('.modal');
+			modals.forEach(modalElement => {
+				new bootstrap.Modal(modalElement);
+			});
+
+			// Add click handler for the Add Criteria button
+			const addCriteriaBtn = document.querySelector('[data-bs-target="#addCriteriaModal"]');
+			if (addCriteriaBtn) {
+				addCriteriaBtn.addEventListener('click', function() {
+					const addCriteriaModal = new bootstrap.Modal(document.getElementById('addCriteriaModal'));
+					addCriteriaModal.show();
+				});
+			}
+
+			// Add click handler for the Edit Criteria buttons
+			const editCriteriaBtns = document.querySelectorAll('[data-bs-target="#editCriteriaModal"]');
+			editCriteriaBtns.forEach(btn => {
+				btn.addEventListener('click', function() {
+					const editCriteriaModal = new bootstrap.Modal(document.getElementById('editCriteriaModal'));
+					editCriteriaModal.show();
+				});
+			});
+
+			// Check URL parameters for page to show
+			const urlParams = new URLSearchParams(window.location.search);
+			const pageToShow = urlParams.get('page');
+			if (pageToShow) {
+				showPage(pageToShow);
+			}
+
+			// Show success/error messages if they exist
+			<?php if (isset($_SESSION['success'])): ?>
+				Swal.fire({
+					title: 'Success!',
+					text: '<?php echo $_SESSION['success']; ?>',
+					icon: 'success'
+				});
+				<?php unset($_SESSION['success']); ?>
+			<?php endif; ?>
+
+			<?php if (isset($_SESSION['error'])): ?>
+				Swal.fire({
+					title: 'Error!',
+					text: '<?php echo $_SESSION['error']; ?>',
+					icon: 'error'
+				});
+				<?php unset($_SESSION['error']); ?>
+			<?php endif; ?>
+		});
+
 		function showPage(id) {
 			document.querySelectorAll('.content > div').forEach(div => div.classList.add('d-none'));
 			document.getElementById(id).classList.remove('d-none');
@@ -591,12 +796,21 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 			document.getElementById('edit_category_id').value = element.getAttribute('data-id');
 			document.getElementById('edit_category_name').value = element.getAttribute('data-name');
 			document.getElementById('edit_contest').value = element.getAttribute('data-contest');
-			document.getElementById('edit_description').value = element.getAttribute('data-description');
+			document.getElementById('edit_category_description').value = element.getAttribute('data-description');
 		}
+
 		function populateEditJudgeModal(element) {
 			document.getElementById('edit_judge_id').value = element.getAttribute('data-id');
 			document.getElementById('edit_judge_name').value = element.getAttribute('data-name');
 			document.getElementById('edit_contact_information').value = element.getAttribute('data-info');
+		}
+
+		function populateEditCriteriaModal(element) {
+			document.getElementById('edit_criteria_id').value = element.getAttribute('data-id');
+			document.getElementById('edit_criteria_name').value = element.getAttribute('data-name');
+			document.getElementById('edit_contest').value = element.getAttribute('data-contest');
+			document.getElementById('edit_criteria_description').value = element.getAttribute('data-description');
+			document.getElementById('edit_max_score').value = element.getAttribute('data-max-score');
 		}
 
 		function confirmDeleteContestant(id) {
@@ -630,6 +844,7 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 				}
 			});
 		}
+
 		function confirmDeleteJudge(id) {
 			Swal.fire({
 				title: 'Are you sure?',
@@ -645,19 +860,23 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 				}
 			});
 		}
-		document.addEventListener('DOMContentLoaded', function() {
-			// Check URL parameters for page to show
-			const urlParams = new URLSearchParams(window.location.search);
-			const pageToShow = urlParams.get('page');
 
-			// If a page parameter exists, show that page
-			if (pageToShow) {
-				showPage(pageToShow);
-			}
-		});
+		function confirmDeleteCriteria(id) {
+			Swal.fire({
+				title: 'Are you sure?',
+				text: "You won't be able to revert this!",
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#d33',
+				cancelButtonColor: '#3085d6',
+				confirmButtonText: 'Yes, delete it!'
+			}).then((result) => {
+				if (result.isConfirmed) {
+					window.location.href = 'criteria_table_query.php?id=' + id;
+				}
+			});
+		}
 	</script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>

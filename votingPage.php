@@ -1,9 +1,36 @@
+<?php
+session_start();
+require_once "connection.php";
+
+// Get contestant ID from URL
+$contestant_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+// Fetch contestant details
+$contestant_query = "SELECT * FROM contestant_table WHERE contestant_id = ?";
+$stmt = $conn->prepare($contestant_query);
+$stmt->bind_param("i", $contestant_id);
+$stmt->execute();
+$contestant = $stmt->get_result()->fetch_assoc();
+
+if (!$contestant) {
+    header("Location: contestantHome.php");
+    exit();
+}
+
+// Fetch criteria for this contest
+$criteria_query = "SELECT * FROM criteria_table WHERE fk_criteria_contest = ? ORDER BY criteria_id";
+$stmt = $conn->prepare($criteria_query);
+$stmt->bind_param("i", $contestant['fk_contestant_contest']);
+$stmt->execute();
+$criteria_result = $stmt->get_result();
+$criteria = $criteria_result->fetch_all(MYSQLI_ASSOC);
+?>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voting Page - Dress to Impress</title>
+    <title>Voting Page - <?php echo htmlspecialchars($contestant['contestant_name']); ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="navbar.css">
     <link rel="stylesheet" href="voting.css">
@@ -38,23 +65,25 @@
         <div class="voting-container">
             <!-- Contestant Image -->
             <div class="image-section">
-                <img src="https://placehold.co/800x1000/666666/FFFFFF/png?text=Contestant+Photo" alt="Contestant" class="contestant-image">
+                <img src="<?php echo $contestant['voting_image'] ? 'uploads/' . htmlspecialchars($contestant['voting_image']) : 'https://placehold.co/800x1000/666666/FFFFFF/png?text=Contestant+Photo'; ?>" 
+                     alt="Contestant" class="contestant-image">
             </div>
 
             <!-- Voting Content -->
             <div class="voting-content">
                 <div class="contestant-header">
-                    <h2>Contestant Name</h2>
-                    <p>Contestant Number</p>
+                    <h2><?php echo htmlspecialchars($contestant['contestant_name']); ?></h2>
+                    <p>Contestant <?php echo htmlspecialchars($contestant['contestant_number']); ?></p>
                 </div>
 
-                <!-- Rating Sections -->
+                <!-- Dynamic Rating Sections -->
+                <?php foreach ($criteria as $criterion): ?>
                 <div class="rating-section">
                     <div class="rating-label">
-                        <span>Appearance</span>
-                        <span class="rating-percentage" id="appearance-percentage">0.00%</span>
+                        <span><?php echo htmlspecialchars($criterion['criteria_name']); ?></span>
+                        <span class="rating-percentage" id="<?php echo 'criteria-' . $criterion['criteria_id']; ?>-percentage">0.00%</span>
                     </div>
-                    <div class="star-rating" id="appearance-stars">
+                    <div class="star-rating" id="<?php echo 'criteria-' . $criterion['criteria_id']; ?>-stars">
                         <div class="star"></div>
                         <div class="star"></div>
                         <div class="star"></div>
@@ -62,60 +91,18 @@
                         <div class="star"></div>
                     </div>
                     <div class="slider-container">
-                        <input type="range" min="0" max="100" value="0" step="0.01" class="rating-slider" id="appearance-slider">
+                        <input type="range" 
+                               min="0" 
+                               max="<?php echo $criterion['max_score']; ?>" 
+                               value="0" 
+                               step="0.01" 
+                               class="rating-slider" 
+                               id="<?php echo 'criteria-' . $criterion['criteria_id']; ?>-slider"
+                               data-criteria-id="<?php echo $criterion['criteria_id']; ?>"
+                               data-criteria-name="<?php echo htmlspecialchars($criterion['criteria_name']); ?>">
                     </div>
                 </div>
-
-                <div class="rating-section">
-                    <div class="rating-label">
-                        <span>Q&A</span>
-                        <span class="rating-percentage" id="qa-percentage">0.00%</span>
-                    </div>
-                    <div class="star-rating" id="qa-stars">
-                        <div class="star"></div>
-                        <div class="star"></div>
-                        <div class="star"></div>
-                        <div class="star"></div>
-                        <div class="star"></div>
-                    </div>
-                    <div class="slider-container">
-                        <input type="range" min="0" max="100" value="0" step="0.01" class="rating-slider" id="qa-slider">
-                    </div>
-                </div>
-
-                <div class="rating-section">
-                    <div class="rating-label">
-                        <span>Talent</span>
-                        <span class="rating-percentage" id="talent-percentage">0.00%</span>
-                    </div>
-                    <div class="star-rating" id="talent-stars">
-                        <div class="star"></div>
-                        <div class="star"></div>
-                        <div class="star"></div>
-                        <div class="star"></div>
-                        <div class="star"></div>
-                    </div>
-                    <div class="slider-container">
-                        <input type="range" min="0" max="100" value="0" step="0.01" class="rating-slider" id="talent-slider">
-                    </div>
-                </div>
-
-                <div class="rating-section">
-                    <div class="rating-label">
-                        <span>Overall Impact</span>
-                        <span class="rating-percentage" id="impact-percentage">0.00%</span>
-                    </div>
-                    <div class="star-rating" id="impact-stars">
-                        <div class="star"></div>
-                        <div class="star"></div>
-                        <div class="star"></div>
-                        <div class="star"></div>
-                        <div class="star"></div>
-                    </div>
-                    <div class="slider-container">
-                        <input type="range" min="0" max="100" value="0" step="0.01" class="rating-slider" id="impact-slider">
-                    </div>
-                </div>
+                <?php endforeach; ?>
 
                 <button class="vote-button" onclick="showVoteConfirmation()">Vote</button>
             </div>
@@ -127,22 +114,12 @@
     <div class="vote-modal" id="voteModal">
         <h3>Please confirm your vote</h3>
         <div class="vote-stats">
+            <?php foreach ($criteria as $criterion): ?>
             <div class="stat-item">
-                <span>Appearance:</span>
-                <span id="modal-appearance">0.00%</span>
+                <span><?php echo htmlspecialchars($criterion['criteria_name']); ?>:</span>
+                <span id="modal-criteria-<?php echo $criterion['criteria_id']; ?>">0.00%</span>
             </div>
-            <div class="stat-item">
-                <span>Q&A:</span>
-                <span id="modal-qa">0.00%</span>
-            </div>
-            <div class="stat-item">
-                <span>Talent:</span>
-                <span id="modal-talent">0.00%</span>
-            </div>
-            <div class="stat-item">
-                <span>Overall Impact:</span>
-                <span id="modal-impact">0.00%</span>
-            </div>
+            <?php endforeach; ?>
             <div class="stat-item">
                 <strong>Total Vote:</strong>
                 <strong id="modal-overall">0.00%</strong>
@@ -156,14 +133,14 @@
 
     <script>
         // Initialize all sliders
-        const categories = ['appearance', 'qa', 'talent', 'impact'];
+        const sliders = document.querySelectorAll('.rating-slider');
         const modal = document.getElementById('voteModal');
         const modalOverlay = document.getElementById('modalOverlay');
 
-        categories.forEach(category => {
-            const slider = document.getElementById(`${category}-slider`);
-            const percentage = document.getElementById(`${category}-percentage`);
-            const stars = document.getElementById(`${category}-stars`).children;
+        sliders.forEach(slider => {
+            const criteriaId = slider.dataset.criteriaId;
+            const percentage = document.getElementById(`criteria-${criteriaId}-percentage`);
+            const stars = document.getElementById(`criteria-${criteriaId}-stars`).children;
 
             // Set initial values
             percentage.textContent = '0.00%';
@@ -195,16 +172,17 @@
         });
 
         function calculateOverall() {
-            const values = categories.map(category => 
-                parseFloat(document.getElementById(`${category}-slider`).value)
+            const values = Array.from(sliders).map(slider => 
+                parseFloat(slider.value)
             );
             return values.reduce((a, b) => a + b, 0) / values.length;
         }
 
         function showVoteConfirmation() {
-            categories.forEach(category => {
-                const value = parseFloat(document.getElementById(`${category}-slider`).value).toFixed(2);
-                document.getElementById(`modal-${category}`).textContent = `${value}%`;
+            sliders.forEach(slider => {
+                const criteriaId = slider.dataset.criteriaId;
+                const value = parseFloat(slider.value).toFixed(2);
+                document.getElementById(`modal-criteria-${criteriaId}`).textContent = `${value}%`;
             });
 
             const overall = calculateOverall().toFixed(2);
@@ -221,8 +199,35 @@
         }
 
         function confirmVote() {
-            // Redirect
-            window.location.href = 'confirmVote.php';
+            const scores = Array.from(sliders).map(slider => ({
+                criteriaId: slider.dataset.criteriaId,
+                criteriaName: slider.dataset.criteriaName,
+                score: parseFloat(slider.value)
+            }));
+
+            // Send scores to server
+            fetch('save_vote.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contestantId: <?php echo $contestant_id; ?>,
+                    scores: scores
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = 'confirmVote.php';
+                } else {
+                    alert('Error saving vote: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error saving vote. Please try again.');
+            });
         }
 
         function goToHome() {

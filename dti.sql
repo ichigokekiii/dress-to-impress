@@ -132,6 +132,7 @@ CREATE TABLE
         `gender` varchar(45) DEFAULT NULL,
         `profile_image` varchar(255) DEFAULT NULL,
         `expanded_image` varchar(255) DEFAULT NULL,
+        `voting_image` varchar(255) DEFAULT NULL,
         PRIMARY KEY (`contestant_id`),
         KEY `fk_contestant_category_idx` (`fk_contestant_category`),
         KEY `fk_contestant_contest_idx` (`fk_contestant_contest`),
