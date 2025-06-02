@@ -521,20 +521,161 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 		<!-- Scores -->
 		<div id="scores" class="d-none">
 			<h2>Score Table</h2>
-			<button class="btn btn-primary mb-2">Add Score</button>
-			<input type="text" class="form-control search-box" placeholder="Search Scores..." onkeyup="searchTable('score-table', this.value)">
+			<button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addScoreModal">Add Score</button>
+			<input type="text" class="form-control search-box" placeholder="Search Scores..." onkeyup="searchTable('scoreTable', this.value)">
+			
+			<?php
+			$query = "SELECT s.*, j.judge_name, c.contestant_name, cr.criteria_name, cr.max_score 
+					  FROM score_table s
+					  LEFT JOIN judge_table j ON s.fk_score_judge = j.judge_id
+					  LEFT JOIN contestant_table c ON s.fk_score_contestant = c.contestant_id
+					  LEFT JOIN criteria_table cr ON s.fk_score_criteria = cr.criteria_id
+					  ORDER BY j.judge_name, c.contestant_name";
+			$query_run = $conn->query($query);
+			?>
 			<div class="table-container">
-				<table class="table table-bordered" id="score-table">
+				<table class="table table-bordered" id="scoreTable">
 					<thead>
 						<tr>
-							<th>Judge Name</th>
-							<th>Contestant Name</th>
-							<th>Score Value</th>
+							<th>ID</th>
+							<th>Judge</th>
+							<th>Contestant</th>
+							<th>Criteria</th>
+							<th>Score</th>
+							<th>Max Score</th>
+							<th>Remarks</th>
+							<th style="width: 15%;">Action</th>
 						</tr>
 					</thead>
 					<tbody>
+					<?php
+					if ($query_run) {
+						while ($row = mysqli_fetch_array($query_run)) {
+							echo "<tr>";
+							echo "<td>" . $row['score_id'] . "</td>";
+							echo "<td>" . htmlspecialchars($row['judge_name']) . "</td>";
+							echo "<td>" . htmlspecialchars($row['contestant_name']) . "</td>";
+							echo "<td>" . htmlspecialchars($row['criteria_name']) . "</td>";
+							echo "<td>" . $row['score_value'] . "</td>";
+							echo "<td>" . $row['max_score'] . "</td>";
+							echo "<td>" . htmlspecialchars($row['remarks'] ?? '') . "</td>";
+							echo "<td>";
+							echo "<button type='button' class='btn btn-success btn-sm me-1' 
+									data-bs-toggle='modal'
+									data-bs-target='#editScoreModal'
+									data-id='" . $row['score_id'] . "'
+									data-score='" . $row['score_value'] . "'
+									data-remarks='" . htmlspecialchars($row['remarks'] ?? '', ENT_QUOTES) . "'
+									data-max-score='" . $row['max_score'] . "'>
+									Edit
+								</button>";
+							echo "<button type='button' class='btn btn-danger btn-sm' onclick='confirmDeleteScore(" . $row['score_id'] . ")'>
+									Delete
+								</button>";
+							echo "</td>";
+							echo "</tr>";
+						}
+					}
+					?>
 					</tbody>
 				</table>
+			</div>
+
+			<!-- Add Score Modal -->
+			<div class="modal fade" id="addScoreModal" tabindex="-1" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Add Score</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<form action="score_table_query.php" method="POST" id="addScoreForm">
+							<div class="modal-body">
+								<div class="mb-3">
+									<label for="judge_id" class="form-label">Judge</label>
+									<select class="form-select" id="judge_id" name="judge_id" required>
+										<?php
+										$judge_query = "SELECT judge_id, judge_name FROM judge_table ORDER BY judge_name";
+										$judge_result = $conn->query($judge_query);
+										while ($judge = $judge_result->fetch_assoc()) {
+											echo "<option value='" . $judge['judge_id'] . "'>" . htmlspecialchars($judge['judge_name']) . "</option>";
+										}
+										?>
+									</select>
+								</div>
+								<div class="mb-3">
+									<label for="contestant_id" class="form-label">Contestant</label>
+									<select class="form-select" id="contestant_id" name="contestant_id" required>
+										<?php
+										$contestant_query = "SELECT contestant_id, contestant_name, contestant_number FROM contestant_table ORDER BY contestant_name";
+										$contestant_result = $conn->query($contestant_query);
+										while ($contestant = $contestant_result->fetch_assoc()) {
+											echo "<option value='" . $contestant['contestant_id'] . "'>#" . $contestant['contestant_number'] . " - " . htmlspecialchars($contestant['contestant_name']) . "</option>";
+										}
+										?>
+									</select>
+								</div>
+								<div class="mb-3">
+									<label for="criteria_id" class="form-label">Criteria</label>
+									<select class="form-select" id="criteria_id" name="criteria_id" required>
+										<?php
+										$criteria_query = "SELECT criteria_id, criteria_name, max_score FROM criteria_table ORDER BY criteria_name";
+										$criteria_result = $conn->query($criteria_query);
+										while ($criteria = $criteria_result->fetch_assoc()) {
+											echo "<option value='" . $criteria['criteria_id'] . "' data-max-score='" . $criteria['max_score'] . "'>" 
+												. htmlspecialchars($criteria['criteria_name']) 
+												. " (Max: " . $criteria['max_score'] . ")</option>";
+										}
+										?>
+									</select>
+								</div>
+								<div class="mb-3">
+									<label for="score_value" class="form-label">Score</label>
+									<input type="number" class="form-control" id="score_value" name="score_value" step="0.01" required>
+									<div id="maxScoreHelp" class="form-text">Maximum score: <span id="maxScoreDisplay">100</span></div>
+								</div>
+								<div class="mb-3">
+									<label for="remarks" class="form-label">Remarks</label>
+									<textarea class="form-control" id="remarks" name="remarks" rows="3"></textarea>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+								<button type="submit" class="btn btn-primary" name="save_score">Save Score</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<!-- Edit Score Modal -->
+			<div class="modal fade" id="editScoreModal" tabindex="-1" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Edit Score</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<form action="score_table_query.php" method="POST" id="editScoreForm">
+							<div class="modal-body">
+								<input type="hidden" id="edit_score_id" name="score_id">
+								<div class="mb-3">
+									<label for="edit_score_value" class="form-label">Score</label>
+									<input type="number" class="form-control" id="edit_score_value" name="score_value" step="0.01" required>
+									<div id="editMaxScoreHelp" class="form-text">Maximum score: <span id="editMaxScoreDisplay">100</span></div>
+								</div>
+								<div class="mb-3">
+									<label for="edit_remarks" class="form-label">Remarks</label>
+									<textarea class="form-control" id="edit_remarks" name="remarks" rows="3"></textarea>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+								<button type="submit" class="btn btn-primary" name="update_score">Update Score</button>
+							</div>
+						</form>
+					</div>
+				</div>
 			</div>
 		</div>
 
@@ -771,6 +912,48 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 				});
 				<?php unset($_SESSION['error']); ?>
 			<?php endif; ?>
+
+			// Initialize Bootstrap modals for scores
+			const addScoreModal = new bootstrap.Modal(document.getElementById('addScoreModal'));
+			const editScoreModal = new bootstrap.Modal(document.getElementById('editScoreModal'));
+
+			// Update max score display when criteria changes
+			const criteriaSelect = document.getElementById('criteria_id');
+			if (criteriaSelect) {
+				criteriaSelect.addEventListener('change', function() {
+					const selectedOption = this.options[this.selectedIndex];
+					const maxScore = selectedOption.getAttribute('data-max-score');
+					document.getElementById('maxScoreDisplay').textContent = maxScore;
+					document.getElementById('score_value').max = maxScore;
+				});
+			}
+
+			// Handle edit score button clicks
+			const editScoreButtons = document.querySelectorAll('[data-bs-target="#editScoreModal"]');
+			editScoreButtons.forEach(button => {
+				button.addEventListener('click', function() {
+					document.getElementById('edit_score_id').value = this.getAttribute('data-id');
+					document.getElementById('edit_score_value').value = this.getAttribute('data-score');
+					document.getElementById('edit_remarks').value = this.getAttribute('data-remarks');
+					document.getElementById('editMaxScoreDisplay').textContent = this.getAttribute('data-max-score');
+					document.getElementById('edit_score_value').max = this.getAttribute('data-max-score');
+				});
+			});
+
+			// Form submission handlers
+			const addScoreForm = document.getElementById('addScoreForm');
+			if (addScoreForm) {
+				addScoreForm.addEventListener('submit', function() {
+					addScoreModal.hide();
+				});
+			}
+
+			const editScoreForm = document.getElementById('editScoreForm');
+			if (editScoreForm) {
+				editScoreForm.addEventListener('submit', function() {
+					editScoreModal.hide();
+				});
+			}
 		});
 
 		function showPage(id) {
@@ -872,6 +1055,22 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 			}).then((result) => {
 				if (result.isConfirmed) {
 					window.location.href = 'criteria_table_query.php?id=' + id;
+				}
+			});
+		}
+
+		function confirmDeleteScore(id) {
+			Swal.fire({
+				title: 'Are you sure?',
+				text: "You won't be able to revert this!",
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#d33',
+				cancelButtonColor: '#3085d6',
+				confirmButtonText: 'Yes, delete it!'
+			}).then((result) => {
+				if (result.isConfirmed) {
+					window.location.href = 'score_table_query.php?id=' + id;
 				}
 			});
 		}
