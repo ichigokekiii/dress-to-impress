@@ -20,6 +20,7 @@ if (!isset($_SESSION['username']) || $_SESSION['userType'] !== 'Judge') {
 	<link rel="stylesheet" href="navbar.css">
 	<link rel="stylesheet" href="user.css">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <body>
 
 <!-- Navbar -->
@@ -39,12 +40,22 @@ if (!isset($_SESSION['username']) || $_SESSION['userType'] !== 'Judge') {
             </div>
 
             <!-- User Info -->
-            <a href="#" class="user-info" onclick="goToUserProfile()">
+            <div class="user-info" onclick="toggleUserMenu(event)">
                 <div class="user-avatar">👤</div>
                 <span id="username">
                     <?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; ?>
                 </span>
-            </a>
+                <!-- User Menu Popout -->
+                <div class="user-menu" id="userMenu">
+                    <div class="user-greeting">
+                        Hello, <strong><?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; ?></strong>
+                    </div>
+                    <a href="logout.php" class="user-menu-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -65,17 +76,17 @@ if (!isset($_SESSION['username']) || $_SESSION['userType'] !== 'Judge') {
                     <div class="action-card-text">Vote</div>
                 </a>
                 
-                <a href="#" class="action-card" onclick="goToPage('view')">
+                <a href="eventsHome.php" class="action-card">
                     <div class="action-card-icon">👁️</div>
                     <div class="action-card-text">View</div>
                 </a>
                 
-                <a href="#" class="action-card" onclick="goToPage('select')">
+                <a href="contestants.php" class="action-card">
                     <div class="action-card-icon">👤</div>
                     <div class="action-card-text">Select</div>
                 </a>
                 
-                <a href="#" class="action-card" onclick="goToPage('tally')">
+                <a href="resultHome.php" class="action-card">
                     <div class="action-card-icon">🏷️</div>
                     <div class="action-card-text">Tally</div>
                 </a>
@@ -108,10 +119,22 @@ if (!isset($_SESSION['username']) || $_SESSION['userType'] !== 'Judge') {
             // window.location.href = 'profile.html';
         }
 
-        // Optional: Add dynamic username update function
+        // Function to update username in all relevant places
         function updateUsername(newUsername) {
+            // Update navbar username
             document.getElementById('username').textContent = newUsername;
-            document.getElementById('welcomeUsername').textContent = newUsername;
+            
+            // Update username in menu greeting
+            const greetingUsername = document.querySelector('.user-greeting strong');
+            if (greetingUsername) {
+                greetingUsername.textContent = newUsername;
+            }
+
+            // Update welcome message username if it exists
+            const welcomeUsername = document.getElementById('welcomeUsername');
+            if (welcomeUsername) {
+                welcomeUsername.textContent = newUsername;
+            }
         }
 
         // Example usage of updateUsername function:
@@ -134,6 +157,26 @@ if (!isset($_SESSION['username']) || $_SESSION['userType'] !== 'Judge') {
         4. Add your logo image by replacing the comment in the navbar-brand section:
            <img src="path/to/your/logo.png" alt="Logo" height="40">
         */
+
+        function toggleUserMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('active');
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('userMenu');
+            const userInfo = document.querySelector('.user-info');
+            if (!userInfo.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // Prevent menu from closing when clicking inside it
+        document.getElementById('userMenu').addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
     </script>
 </body>
 </html>

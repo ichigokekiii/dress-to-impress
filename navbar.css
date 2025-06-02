@@ -70,40 +70,104 @@
 }
 
 .user-info {
+    position: relative;
     display: flex;
     align-items: center;
-    color: white;
+    gap: 10px;
     text-decoration: none;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 25px;
     transition: all 0.3s ease;
-    flex-shrink: 0;
-    min-width: 120px;
-    justify-content: flex-end;
+    cursor: pointer;
 }
 
 .user-info:hover {
-    color: #f8f9fa !important;
-    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .user-avatar {
-    width: 24px;
-    height: 24px;
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 6px;
-    font-size: 11px;
-    flex-shrink: 0;
+    font-size: 0.9rem;
 }
 
-.user-info span {
-    font-size: 0.85rem;
-    max-width: 80px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.user-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    min-width: 200px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.user-menu.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.user-menu::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: 20px;
+    width: 10px;
+    height: 10px;
+    background: white;
+    transform: rotate(45deg);
+}
+
+.user-greeting {
+    color: #333;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.user-greeting strong {
+    display: block;
+    font-size: 1.1rem;
+    color: #333;
+    margin-top: 3px;
+}
+
+.user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.user-menu-item:hover {
+    color: #DF81B3;
+}
+
+.user-menu-item i {
+    font-size: 1.2rem;
+    width: 20px;
+    text-align: center;
+}
+
+.user-menu-item .door-icon {
+    font-size: 1rem;
+    margin-left: 3px;
 }
 
 /* Mobile Responsive */

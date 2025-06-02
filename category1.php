@@ -32,6 +32,7 @@ $contestants = $conn->query($contestant_query);
     <link rel="stylesheet" href="navbar.css">
     <link rel="stylesheet" href="category1.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         /* Add animation styles */
         .contestant-card {
@@ -98,12 +99,22 @@ $contestants = $conn->query($contestant_query);
             </div>
 
             <!-- User Info -->
-            <a href="#" class="user-info" onclick="goToUserProfile()">
+            <div class="user-info" onclick="toggleUserMenu(event)">
                 <div class="user-avatar">👤</div>
                 <span id="username">
                     <?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; ?>
                 </span>
-            </a>
+                <!-- User Menu Popout -->
+                <div class="user-menu" id="userMenu">
+                    <div class="user-greeting">
+                        Hello, <strong><?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; ?></strong>
+                    </div>
+                    <a href="logout.php" class="user-menu-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -175,8 +186,36 @@ $contestants = $conn->query($contestant_query);
             console.log('Going to user profile');
         }
 
+        function toggleUserMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('active');
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('userMenu');
+            const userInfo = document.querySelector('.user-info');
+            if (!userInfo.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // Prevent menu from closing when clicking inside it
+        document.getElementById('userMenu').addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+
+        // Function to update username in all relevant places
         function updateUsername(newUsername) {
+            // Update navbar username
             document.getElementById('username').textContent = newUsername;
+            
+            // Update username in menu greeting
+            const greetingUsername = document.querySelector('.user-greeting strong');
+            if (greetingUsername) {
+                greetingUsername.textContent = newUsername;
+            }
         }
     </script>
 </body>
