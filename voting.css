@@ -374,6 +374,53 @@ input[type="range"]::-webkit-slider-thumb:hover {
     box-shadow: 0 4px 15px rgba(223, 129, 179, 0.4);
 }
 
+/* Rules Modal Specific Styles */
+.rules-modal {
+    max-width: 500px;
+}
+
+.rules-content {
+    margin-bottom: 30px;
+    background: rgba(223, 129, 179, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.5s ease 0.3s;
+    max-height: 300px;
+    overflow-y: auto;
+    text-align: left;
+    line-height: 1.6;
+}
+
+.rules-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.rules-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.rules-content::-webkit-scrollbar-thumb {
+    background: #DF81B3;
+    border-radius: 4px;
+}
+
+.rules-content::-webkit-scrollbar-thumb:hover {
+    background: #c76a9a;
+}
+
+.vote-modal.active .rules-content {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.rules-content p {
+    margin: 0;
+    color: #333;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .voting-container {

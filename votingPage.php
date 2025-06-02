@@ -56,7 +56,7 @@ $criteria = $criteria_result->fetch_all(MYSQLI_ASSOC);
             height: 100%;
         }
         .navbar-brand img {
-            height: 35px;
+            height: 55px;
             transform: scale(1.3);
             transform-origin: left center;
         }
@@ -167,10 +167,49 @@ $criteria = $criteria_result->fetch_all(MYSQLI_ASSOC);
         <button class="confirm-vote-btn" onclick="confirmVote()">Confirm Vote</button>
     </div>
 
+    <!-- Rules Modal -->
+    <div class="modal-overlay" id="rulesModalOverlay"></div>
+    <div class="vote-modal rules-modal" id="rulesModal">
+        <h3>Rules and Criteria</h3>
+        <div class="rules-content">
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+        </div>
+        <button class="confirm-vote-btn" onclick="acceptRules()">I understand</button>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        // Show rules modal on page load
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const rulesModal = document.getElementById('rulesModal');
+            const rulesOverlay = document.getElementById('rulesModalOverlay');
+            
+            rulesOverlay.style.display = 'block';
+            rulesModal.style.display = 'block';
+            
+            // Trigger animations
+            setTimeout(() => {
+                rulesOverlay.classList.add('active');
+                rulesModal.classList.add('active');
+            }, 10);
+        });
+
+        function acceptRules() {
+            const rulesModal = document.getElementById('rulesModal');
+            const rulesOverlay = document.getElementById('rulesModalOverlay');
+            
+            rulesModal.classList.remove('active');
+            rulesOverlay.classList.remove('active');
+            
+            // Wait for animations to finish before hiding
+            setTimeout(() => {
+                rulesModal.style.display = 'none';
+                rulesOverlay.style.display = 'none';
+            }, 500);
+        }
+
         // Initialize all sliders
         const sliders = document.querySelectorAll('.rating-slider');
         const modal = document.getElementById('voteModal');

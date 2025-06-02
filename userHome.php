@@ -27,7 +27,7 @@ if (!isset($_SESSION['username']) || $_SESSION['userType'] !== 'Judge') {
         <div class="navbar-container">
             <!-- Logo -->
             <a class="navbar-brand" href="#" onclick="goToHome()">
-                <img src="dresstoimpress.png" alt="Dress to Impress Logo" height="35">
+                <img src="dresstoimpress.png" alt="Dress to Impress Logo" height="55">
             </a>
 
             <!-- Navigation Links -->
