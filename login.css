@@ -8,6 +8,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow-x: hidden;
 }
 
 .login-container {
@@ -18,6 +19,9 @@ body {
     width: 900px;
     height: 500px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: containerFade 0.5s ease-out forwards;
 }
 
 .login-form {
@@ -32,12 +36,17 @@ body {
     font-size: 2.5rem;
     margin-bottom: 10px;
     font-weight: bold;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideUpFade 0.5s ease-out 0.5s forwards;
 }
 
 .login-form p {
     font-size: 1.1rem;
     margin-bottom: 30px;
-    opacity: 0.8;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideUpFade 0.5s ease-out 0.7s forwards;
 }
 
 .form-group {
@@ -45,6 +54,16 @@ body {
     border-radius: 10px;
     padding: 15px;
     margin-bottom: 20px;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.form-group:nth-child(1) {
+    animation: slideUpFade 0.5s ease-out 0.9s forwards;
+}
+
+.form-group:nth-child(2) {
+    animation: slideUpFade 0.5s ease-out 1.1s forwards;
 }
 
 .form-group input {
@@ -71,6 +90,9 @@ body {
     margin-top: 10px;
     width: 100%;
     height: 45px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideUpFade 0.5s ease-out 1.3s forwards;
 }
 
 .login-btn:hover {
@@ -79,22 +101,22 @@ body {
 }
 
 /* Image Sections */
-.image-section-admin {
+.image-section-admin,
+.image-section-judge,
+.image-section-organizer {
     flex: 1;
-    background: url('admin-login.jpg') center/cover;
+    background: url('admin_login.png') center/cover;
     position: relative;
+    opacity: 0;
+    animation: imageFade 1s ease-out 0.3s forwards;
 }
 
 .image-section-judge {
-    flex: 1;
-    background: url('judge-login.jpg') center/cover;
-    position: relative;
+    background: url('judge_login.png') center/cover;
 }
 
 .image-section-organizer {
-    flex: 1;
-    background: url('organizer-login.jpg') center/cover;
-    position: relative;
+    background: url('staff_login.jpg') center/cover;
 }
 
 .image-section-admin::before,
@@ -114,6 +136,38 @@ body {
     opacity: 0.6;
     margin-top: 5px;
     text-align: center;
+}
+
+/* Animations */
+@keyframes containerFade {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes imageFade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 /* Responsive Design */
