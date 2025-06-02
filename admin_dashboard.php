@@ -950,13 +950,41 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 		<!-- Logs -->
 		<div id="logs" class="d-none">
 			<h2>Logs</h2>
+			<button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#filterLogsModal">
+				<i class="fas fa-filter"></i> Filter Logs
+			</button>
 			<input type="text" class="form-control search-box mb-3" placeholder="Search Logs..." onkeyup="searchTable('logsTable', this.value)">
 			
 			<?php
+			// Build the query with filters
 			$query = "SELECT l.*, u.username 
 					  FROM logs_table l
-					  LEFT JOIN users_table u ON l.fk_logs_users = u.users_id
-					  ORDER BY l.log_time DESC";
+					  LEFT JOIN users_table u ON l.fk_logs_users = u.users_id";
+			
+			// Add WHERE clause if filters are set
+			$where_conditions = [];
+			if (isset($_GET['user']) && !empty($_GET['user'])) {
+				$user_id = intval($_GET['user']);
+				$where_conditions[] = "l.fk_logs_users = $user_id";
+			}
+			if (isset($_GET['start_date']) && !empty($_GET['start_date'])) {
+				$start_date = $conn->real_escape_string($_GET['start_date']);
+				$where_conditions[] = "DATE(l.log_time) >= '$start_date'";
+			}
+			if (isset($_GET['end_date']) && !empty($_GET['end_date'])) {
+				$end_date = $conn->real_escape_string($_GET['end_date']);
+				$where_conditions[] = "DATE(l.log_time) <= '$end_date'";
+			}
+			if (isset($_GET['action_type']) && !empty($_GET['action_type'])) {
+				$action_type = $conn->real_escape_string($_GET['action_type']);
+				$where_conditions[] = "l.action LIKE '%$action_type%'";
+			}
+			
+			if (!empty($where_conditions)) {
+				$query .= " WHERE " . implode(" AND ", $where_conditions);
+			}
+			
+			$query .= " ORDER BY l.log_time DESC";
 			$query_run = $conn->query($query);
 			?>
 			<div class="table-container">
@@ -984,6 +1012,60 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 					?>
 					</tbody>
 				</table>
+			</div>
+
+			<!-- Filter Logs Modal -->
+			<div class="modal fade" id="filterLogsModal" tabindex="-1" aria-labelledby="filterLogsModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="filterLogsModalLabel">Filter Logs</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<form action="" method="GET" id="filterLogsForm">
+							<input type="hidden" name="page" value="logs">
+							<div class="modal-body">
+								<div class="mb-3">
+									<label for="user" class="form-label">User</label>
+									<select class="form-select" id="user" name="user">
+										<option value="">All Users</option>
+										<?php
+										$users_query = "SELECT users_id, username FROM users_table ORDER BY username";
+										$users_result = $conn->query($users_query);
+										while ($user = $users_result->fetch_assoc()) {
+											$selected = (isset($_GET['user']) && $_GET['user'] == $user['users_id']) ? 'selected' : '';
+											echo "<option value='" . $user['users_id'] . "' $selected>" . htmlspecialchars($user['username']) . "</option>";
+										}
+										?>
+									</select>
+								</div>
+								<div class="mb-3">
+									<label for="action_type" class="form-label">Action Type</label>
+									<select class="form-select" id="action_type" name="action_type">
+										<option value="">All Actions</option>
+										<option value="Added" <?php echo (isset($_GET['action_type']) && $_GET['action_type'] == 'Added') ? 'selected' : ''; ?>>Added</option>
+										<option value="Updated" <?php echo (isset($_GET['action_type']) && $_GET['action_type'] == 'Updated') ? 'selected' : ''; ?>>Updated</option>
+										<option value="Deleted" <?php echo (isset($_GET['action_type']) && $_GET['action_type'] == 'Deleted') ? 'selected' : ''; ?>>Deleted</option>
+									</select>
+								</div>
+								<div class="mb-3">
+									<label for="start_date" class="form-label">Start Date</label>
+									<input type="date" class="form-control" id="start_date" name="start_date" 
+										   value="<?php echo $_GET['start_date'] ?? ''; ?>">
+								</div>
+								<div class="mb-3">
+									<label for="end_date" class="form-label">End Date</label>
+									<input type="date" class="form-control" id="end_date" name="end_date"
+										   value="<?php echo $_GET['end_date'] ?? ''; ?>">
+								</div>
+							</div>
+							<div class="modal-footer">
+								<a href="?page=logs" class="btn btn-secondary">Clear Filters</a>
+								<button type="submit" class="btn btn-primary">Apply Filters</button>
+							</div>
+						</form>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -1114,6 +1196,64 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 					document.getElementById('edit_password').value = ''; // Clear password field
 				});
 			});
+
+			// Show filter modal if there are active filters
+			if (window.location.search.includes('user=') || 
+				window.location.search.includes('action_type=') || 
+				window.location.search.includes('start_date=') || 
+				window.location.search.includes('end_date=')) {
+				document.querySelector('#filterLogsModal button[type="submit"]').classList.add('active');
+			}
+
+			// Validate date range
+			document.getElementById('filterLogsForm').addEventListener('submit', function(e) {
+				const startDate = document.getElementById('start_date').value;
+				const endDate = document.getElementById('end_date').value;
+				
+				if (startDate && endDate && startDate > endDate) {
+					e.preventDefault();
+					Swal.fire({
+						title: 'Error!',
+						text: 'Start date cannot be later than end date',
+						icon: 'error'
+					});
+				}
+			});
+
+			// Initialize all modals
+			var modals = document.querySelectorAll('.modal');
+			modals.forEach(function(modal) {
+				new bootstrap.Modal(modal);
+			});
+
+			// Handle filter form submission
+			const filterForm = document.getElementById('filterLogsForm');
+			if (filterForm) {
+				filterForm.addEventListener('submit', function(e) {
+					const startDate = document.getElementById('start_date').value;
+					const endDate = document.getElementById('end_date').value;
+					
+					if (startDate && endDate && startDate > endDate) {
+						e.preventDefault();
+						Swal.fire({
+							title: 'Error!',
+							text: 'Start date cannot be later than end date',
+							icon: 'error'
+						});
+					}
+				});
+			}
+
+			// Show active state for filter button if filters are applied
+			if (window.location.search.includes('user=') || 
+				window.location.search.includes('action_type=') || 
+				window.location.search.includes('start_date=') || 
+				window.location.search.includes('end_date=')) {
+				const filterButton = document.querySelector('[data-bs-target="#filterLogsModal"]');
+				if (filterButton) {
+					filterButton.classList.add('active');
+				}
+			}
 		});
 
 		function showPage(id) {
