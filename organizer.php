@@ -990,46 +990,65 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<script>
 		document.addEventListener('DOMContentLoaded', function() {
-			// Initialize Bootstrap modals
-			const addCriteriaModal = new bootstrap.Modal(document.getElementById('addCriteriaModal'));
-			const editCriteriaModal = new bootstrap.Modal(document.getElementById('editCriteriaModal'));
+			// Initialize all Bootstrap modals
+			const modals = document.querySelectorAll('.modal');
+			modals.forEach(modal => {
+				new bootstrap.Modal(modal);
+			});
 
 			// Add Criteria button click handler
 			const addCriteriaBtn = document.querySelector('#addCriteriaBtn');
 			if (addCriteriaBtn) {
 				addCriteriaBtn.addEventListener('click', function() {
+					const addCriteriaModal = new bootstrap.Modal(document.getElementById('addCriteriaModal'));
 					addCriteriaModal.show();
 				});
 			}
 
-			// Edit button click handlers
-			const editButtons = document.querySelectorAll('.btn-success');
+			// Close button handlers for criteria modals
+			const closeButtons = document.querySelectorAll('[data-bs-dismiss="modal"]');
+			closeButtons.forEach(button => {
+				button.addEventListener('click', function() {
+					const modalElement = this.closest('.modal');
+					const modalInstance = bootstrap.Modal.getInstance(modalElement);
+					if (modalInstance) {
+						modalInstance.hide();
+					}
+				});
+			});
+
+			// Edit button click handlers for criteria
+			const editButtons = document.querySelectorAll('#criteriaTable .btn-success');
 			editButtons.forEach(button => {
 				button.addEventListener('click', function() {
-					// Populate the edit form with data from button attributes
 					document.getElementById('edit_criteria_id').value = this.getAttribute('data-id');
 					document.getElementById('edit_criteria_name').value = this.getAttribute('data-name');
 					document.getElementById('edit_contest').value = this.getAttribute('data-contest');
 					document.getElementById('edit_criteria_description').value = this.getAttribute('data-description');
 					document.getElementById('edit_max_score').value = this.getAttribute('data-max-score');
-					
-					// Show the modal
-					editCriteriaModal.show();
 				});
 			});
 
 			// Form submission handlers
 			const addForm = document.getElementById('addCriteriaForm');
 			if (addForm) {
-				addForm.addEventListener('submit', function() {
-					addCriteriaModal.hide();
+				addForm.addEventListener('submit', function(e) {
+					const modalElement = this.closest('.modal');
+					const modalInstance = bootstrap.Modal.getInstance(modalElement);
+					if (modalInstance) {
+						modalInstance.hide();
+					}
 				});
 			}
 
 			const editForm = document.getElementById('editCriteriaForm');
 			if (editForm) {
-				editForm.addEventListener('submit', function() {
-					editCriteriaModal.hide();
+				editForm.addEventListener('submit', function(e) {
+					const modalElement = this.closest('.modal');
+					const modalInstance = bootstrap.Modal.getInstance(modalElement);
+					if (modalInstance) {
+						modalInstance.hide();
+					}
 				});
 			}
 
