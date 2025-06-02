@@ -674,22 +674,8 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 		<!-- Scores -->
 		<div id="scores" class="d-none">
 			<h2>Score Table</h2>
-			<button class="btn btn-primary mb-2">Add Score</button>
-			<input type="text" class="form-control search-box" placeholder="Search Scores..." onkeyup="searchTable('score-table', this.value)">
-			<div class="table-container">
-				<table class="table table-bordered" id="score-table">
-					<thead>
-						<tr>
-							<th>Judge Name</th>
-							<th>Contestant Name</th>
-							<th>Score Value</th>
-						</tr>
-					</thead>
-					<tbody>
-						<!-- PHP JOINED rows go here -->
-					</tbody>
-				</table>
-			</div>
+			<button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addScoreModal">Add Score</button>
+			<?php include 'score_section.php'; ?>
 		</div>
 
 		<!-- Criteria -->
