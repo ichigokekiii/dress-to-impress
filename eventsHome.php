@@ -14,8 +14,81 @@ if (!isset($_SESSION['username'])) {
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Events - Dress to Impress</title>
-	<link rel="stylesheet" href="user.css">
+	<!-- Google Fonts -->
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	<!-- Font Awesome -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+	<!-- Bootstrap CSS -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="navbar.css">
+	<link rel="stylesheet" href="events.css">
+	<style>
+		body {
+			font-family: 'Poppins', sans-serif;
+			background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+			color: white;
+			min-height: 100vh;
+			margin: 0;
+			padding: 0;
+		}
+
+		/* Ensure consistent navbar height */
+		.navbar {
+			height: 70px;
+		}
+
+		.navbar-container {
+			height: 100%;
+		}
+
+		.navbar-brand img {
+			height: 55px;
+			transform: scale(1.3);
+			transform-origin: left center;
+		}
+
+		.navbar-links {
+			gap: 40px;
+		}
+
+		.navbar-links a {
+			font-family: 'Poppins', sans-serif;
+			font-weight: 500;
+			font-size: 0.9rem;
+			letter-spacing: 1px;
+		}
+
+		.user-info {
+			min-width: 120px;
+		}
+
+		.page-content {
+			max-width: 1400px;
+			margin: 0 auto;
+			padding: 40px 20px;
+		}
+
+		.page-content h1 {
+			font-size: 2.5rem;
+			font-weight: bold;
+			text-align: center;
+			margin-bottom: 30px;
+			opacity: 0;
+			animation: fadeIn 1.2s ease-out forwards;
+		}
+
+		@keyframes fadeIn {
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+	</style>
 </head>
 <body>
 	<!-- Navbar -->
@@ -44,43 +117,28 @@ if (!isset($_SESSION['username'])) {
 		</div>
 	</nav>
 
-	<!-- Your Page Content Goes Here -->
+	<!-- Page Content -->
 	<div class="page-content">
-		<h1>Your Page Content</h1>
-		<p>Replace this section with your actual page content.</p>
+		<h1>Events</h1>
+		<!-- Add your events content here -->
 	</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
 
 	<script>
-		// Function to navigate to home page
 		function goToHome() {
-			// Add your home page URL here
-			console.log('Going to home page');
-			// window.location.href = 'index.html';
+			window.location.href = 'userHome.php';
 		}
 
-		// Function to navigate to different pages
-		function goToPage(page) {
-			// Add your page URLs here
-			console.log('Going to ' + page + ' page');
-			// Example: window.location.href = page + '.html';
-		}
-
-		// Function to navigate to user profile
 		function goToUserProfile() {
-			// Add your user profile page URL here
 			console.log('Going to user profile');
-			// window.location.href = 'profile.html';
 		}
 
-		// Optional: Add dynamic username update function
 		function updateUsername(newUsername) {
 			document.getElementById('username').textContent = newUsername;
 		}
 	</script>
-
-
 </body>
 </html>
