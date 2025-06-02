@@ -950,7 +950,41 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 		<!-- Logs -->
 		<div id="logs" class="d-none">
 			<h2>Logs</h2>
-			<!-- View logs -->
+			<input type="text" class="form-control search-box mb-3" placeholder="Search Logs..." onkeyup="searchTable('logsTable', this.value)">
+			
+			<?php
+			$query = "SELECT l.*, u.username 
+					  FROM logs_table l
+					  LEFT JOIN users_table u ON l.fk_logs_users = u.users_id
+					  ORDER BY l.log_time DESC";
+			$query_run = $conn->query($query);
+			?>
+			<div class="table-container">
+				<table class="table table-bordered" id="logsTable">
+					<thead>
+						<tr>
+							<th>Log ID</th>
+							<th>User</th>
+							<th>Action</th>
+							<th>Date & Time</th>
+						</tr>
+					</thead>
+					<tbody>
+					<?php
+					if ($query_run) {
+						while ($row = mysqli_fetch_array($query_run)) {
+							echo "<tr>";
+							echo "<td>" . $row['log_id'] . "</td>";
+							echo "<td>" . htmlspecialchars($row['username'] ?? 'System') . "</td>";
+							echo "<td>" . htmlspecialchars($row['action']) . "</td>";
+							echo "<td>" . date('M d, Y h:i A', strtotime($row['log_time'])) . "</td>";
+							echo "</tr>";
+						}
+					}
+					?>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 

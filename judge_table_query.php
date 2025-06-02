@@ -2,32 +2,66 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-ob_start();
-include "connection.php";
+require_once "connection.php";
 
-// Check if user is logged in
-if (!isset($_SESSION['username'])) {
+// Check if user is logged in and has appropriate access
+if (!isset($_SESSION['username']) || !in_array($_SESSION['userType'], ['Admin', 'Staff'])) {
     header("Location: login.php");
     exit();
 }
 
+// Get user ID from the database if not in session
+if (!isset($_SESSION['users_id'])) {
+    $username = $conn->real_escape_string($_SESSION['username']);
+    $query = "SELECT users_id FROM users_table WHERE username = '$username'";
+    $result = $conn->query($query);
+    if ($result && $row = $result->fetch_assoc()) {
+        $_SESSION['users_id'] = $row['users_id'];
+    }
+}
+
 if (isset($_POST['update_judge'])) {
     $judge_id = $_POST['judge_id'];
-    $judge_name = $_POST['judge_name'];
-    $contact_information = $_POST['contact_information'];
+    $judge_name = $conn->real_escape_string($_POST['judge_name']);
+    $contact_information = $conn->real_escape_string($_POST['contact_information']);
 
-    $update_query_judges = "UPDATE judge_table SET
-					 judge_name = '$judge_name',
-					 contact_information = '$contact_information',
-					 WHERE judge_id = '$judge_id'";
+    try {
+        // Start transaction
+        $conn->begin_transaction();
 
-    if ($conn->query($update_query_judges)) {
-        header("Location: admin_dashboard.php?page=judges&judge_success=updated");
-        exit();
-    } else {
-        header("Location: admin_dashboard.php?error=updatefail");
-        exit();
+        $update_query_judges = "UPDATE judge_table SET
+                     judge_name = '$judge_name',
+                     contact_information = '$contact_information'
+                     WHERE judge_id = '$judge_id'";
+
+        if ($conn->query($update_query_judges)) {
+            // Only log if we have a valid user ID
+            if (isset($_SESSION['users_id'])) {
+                // Log the update action
+                $log_query = "INSERT INTO logs_table (fk_logs_users, action, log_time) 
+                             VALUES ('" . $_SESSION['users_id'] . "', 'Updated judge: $judge_name', NOW())";
+                $conn->query($log_query);
+            }
+            
+            // Commit transaction
+            $conn->commit();
+            
+            $_SESSION['success'] = "Judge updated successfully!";
+        } else {
+            throw new Exception($conn->error);
+        }
+    } catch (Exception $e) {
+        // Rollback transaction on error
+        $conn->rollback();
+        $_SESSION['error'] = "Error updating judge: " . $e->getMessage();
     }
+
+    if ($_SESSION['userType'] === 'Admin') {
+        header("Location: admin_dashboard.php?page=judges");
+    } else {
+        header("Location: organizer.php?page=judges");
+    }
+    exit();
 }
 
 if (isset($_GET['judge_success'])) {
@@ -161,7 +195,7 @@ if (isset($_GET['id'])) {
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="admin_dashboard.php" method="POST">
+                    <form action="judge_table_query.php" method="POST">
                         <input type="hidden" id="edit_judge_id" name="judge_id">
                         <div class="row mb-3">
                             <div class="col">
