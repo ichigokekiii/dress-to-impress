@@ -108,7 +108,7 @@ $query_run = $conn->query($query);
             echo "<td>" . date('M d, Y', strtotime($row['contest_date'])) . "</td>";
             echo "<td>" . htmlspecialchars($row['location']) . "</td>";
             echo "<td>";
-            echo "<a href='#' class='btn btn-success btn-sm me-1'
+            echo "<button type='button' class='btn btn-success btn-sm me-1'
                     data-bs-toggle='modal'
                     data-bs-target='#editContestModal'
                     data-id='" . $row['contest_id'] . "'
@@ -117,8 +117,8 @@ $query_run = $conn->query($query);
                     data-location='" . htmlspecialchars($row['location'], ENT_QUOTES) . "'
                     onclick='populateEditContestModal(this)'>
                     Edit
-                </a>";
-            echo "<a href='#' class='btn btn-danger btn-sm' onclick='confirmDeleteContest(" . $row['contest_id'] . ")'>Delete</a>";
+                </button>";
+            echo "<button type='button' class='btn btn-danger btn-sm' onclick='confirmDeleteContest(" . $row['contest_id'] . ")'>Delete</button>";
             echo "</td>";
             echo "</tr>";
         }
@@ -239,5 +239,22 @@ function confirmDeleteContest(id) {
             });
         }
     });
+}
+
+function populateEditContestModal(element) {
+    // Get the modal element
+    const modal = document.getElementById('editContestModal');
+    
+    // Get all the values from data attributes
+    const id = element.getAttribute('data-id');
+    const name = element.getAttribute('data-name');
+    const date = element.getAttribute('data-date');
+    const location = element.getAttribute('data-location');
+    
+    // Set the values in the form fields
+    modal.querySelector('#edit_contest_id').value = id;
+    modal.querySelector('#edit_contest_name').value = name;
+    modal.querySelector('#edit_contest_date').value = date;
+    modal.querySelector('#edit_location').value = location;
 }
 </script> 
