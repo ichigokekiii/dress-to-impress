@@ -26,7 +26,7 @@ body {
     margin-bottom: 50px;
     color: white;
     opacity: 0;
-    animation: fadeIn 1s ease-out forwards;
+    animation: fadeIn 1s ease-out 0.5s forwards;
 }
 
 /* Role Grid */
@@ -54,15 +54,15 @@ body {
 }
 
 .role-card[data-role="admin"] {
-    animation: slideUpFade 0.5s ease-out 0.2s forwards;
+    animation: slideUpFade 0.5s ease-out 0.7s forwards;
 }
 
 .role-card[data-role="organizer"] {
-    animation: slideUpFade 0.5s ease-out 0.4s forwards;
+    animation: slideUpFade 0.5s ease-out 0.9s forwards;
 }
 
 .role-card[data-role="judge"] {
-    animation: slideUpFade 0.5s ease-out 0.6s forwards;
+    animation: slideUpFade 0.5s ease-out 1.1s forwards;
 }
 
 /* Add overlay for hover effect */
