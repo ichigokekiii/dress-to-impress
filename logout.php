@@ -19,6 +19,6 @@ if (isset($_SESSION['user_id'])) {
 session_destroy();
 
 // Redirect to login page
-header("Location: login.php");
+header("Location: prelogin.php");
 exit();
 ?> 

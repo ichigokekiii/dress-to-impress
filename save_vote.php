@@ -17,7 +17,6 @@ if (!$data || !isset($data['contestantId']) || !isset($data['scores'])) {
 }
 
 try {
-
     $conn->begin_transaction();
 
     $judge_query = "SELECT j.judge_id 
@@ -31,7 +30,6 @@ try {
     $judge = $judge_result->fetch_assoc();
 
     if (!$judge) {
-
         $insert_judge_query = "INSERT INTO judge_table (judge_name, contact_information) VALUES (?, ?)";
         $stmt = $conn->prepare($insert_judge_query);
         $contact_info = "";
@@ -42,7 +40,6 @@ try {
         $judge_id = $judge['judge_id'];
     }
 
- 
     $check_query = "SELECT COUNT(*) as count FROM score_table 
                    WHERE fk_score_judge = ? AND fk_score_contestant = ?";
     $stmt = $conn->prepare($check_query);
@@ -68,7 +65,6 @@ try {
         $stmt->execute();
     }
 
-
     $contestant_query = "SELECT contestant_name, contestant_number FROM contestant_table WHERE contestant_id = ?";
     $stmt = $conn->prepare($contestant_query);
     $stmt->bind_param("i", $data['contestantId']);
@@ -86,7 +82,6 @@ try {
     echo json_encode(['success' => true]);
 
 } catch (Exception $e) {
-
     $conn->rollback();
     
     http_response_code(500);

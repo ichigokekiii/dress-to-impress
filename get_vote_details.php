@@ -1,7 +1,6 @@
 <?php
 require_once "connection.php";
 
-// Get contestant ID from URL
 $contestant_id = isset($_GET['contestant_id']) ? intval($_GET['contestant_id']) : 0;
 
 if (!$contestant_id) {
@@ -9,7 +8,6 @@ if (!$contestant_id) {
     exit();
 }
 
-// Fetch criteria scores for the contestant
 $criteria_query = "
     SELECT 
         ct.criteria_name,

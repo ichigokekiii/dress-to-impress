@@ -517,7 +517,6 @@ while ($contestant = $result->fetch_assoc()) {
     <div class="vote-modal" id="detailsModal">
         <h3>Vote Details</h3>
         <div class="vote-stats" id="modalContent">
-            <!-- Content will be dynamically inserted here -->
         </div>
         <button class="close-modal-btn" onclick="closeModal()">Close</button>
     </div>
@@ -532,14 +531,12 @@ while ($contestant = $result->fetch_assoc()) {
         }
 
         function showDetails(contestantId) {
-            // Fetch vote details from the server
             fetch(`get_vote_details.php?contestant_id=${contestantId}`)
                 .then(response => response.json())
                 .then(data => {
                     const modalContent = document.getElementById('modalContent');
                     let html = '';
                     
-                    // Add criteria scores
                     data.criteria.forEach(criterion => {
                         html += `
                             <div class="stat-item">
@@ -549,7 +546,6 @@ while ($contestant = $result->fetch_assoc()) {
                         `;
                     });
                     
-                    // Add total score
                     html += `
                         <div class="stat-item">
                             <strong>Total Score:</strong>
@@ -565,7 +561,6 @@ while ($contestant = $result->fetch_assoc()) {
                     overlay.style.display = 'block';
                     modal.style.display = 'block';
                     
-                    // Trigger animations
                     setTimeout(() => {
                         overlay.classList.add('active');
                         modal.classList.add('active');
