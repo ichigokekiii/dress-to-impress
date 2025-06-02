@@ -49,7 +49,9 @@ $categories = $conn->query($category_query);
 
             <a href="#" class="user-info">
                 <div class="user-avatar">👤</div>
-                <span id="username">Username</span>
+                <span id="username">
+                    <?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; ?>
+                </span>
             </a>
         </div>
     </nav>

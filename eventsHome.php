@@ -1,9 +1,19 @@
+<?php
+session_start();
+require_once "connection.php";
+
+// Check if user is logged in
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html>
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>User Page</title>
+	<title>Events - Dress to Impress</title>
 	<link rel="stylesheet" href="user.css">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -18,18 +28,17 @@
 
 			<!-- Navigation Links -->
 			<div class="navbar-links">
-				<a href="userHome.php" onclick="goToPage('home')">HOME</a>
-				<a href="eventsHome.php" onclick="goToPage('events')">EVENTS</a>
-				<a href="resultHome.php" onclick="goToPage('results')">RESULTS</a>
-				<a href="contestantHome.php" onclick="goToPage('contestants')">CONTESTANTS</a>
+				<a href="userHome.php">HOME</a>
+				<a href="eventsHome.php">EVENTS</a>
+				<a href="resultHome.php">RESULTS</a>
+				<a href="contestantHome.php">CONTESTANTS</a>
 			</div>
 
 			<!-- User Info -->
 			<a href="#" class="user-info" onclick="goToUserProfile()">
-				<div class="user-avatar">��</div>
+				<div class="user-avatar">👤</div>
 				<span id="username">
-					<!-- CONNECT TO DATABASE: Replace this with PHP code to get username from database -->
-					Username
+					<?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; ?>
 				</span>
 			</a>
 		</div>

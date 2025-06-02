@@ -42,8 +42,7 @@ if (!isset($_SESSION['username']) || $_SESSION['userType'] !== 'Judge') {
             <a href="#" class="user-info" onclick="goToUserProfile()">
                 <div class="user-avatar">👤</div>
                 <span id="username">
-                    <!-- CONNECT TO DATABASE: Replace this with PHP code to get username from database -->
-                    Username
+                    <?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; ?>
                 </span>
             </a>
         </div>
@@ -54,17 +53,9 @@ if (!isset($_SESSION['username']) || $_SESSION['userType'] !== 'Judge') {
         <div class="container">
             <h1 class="welcome-text">
                 Welcome, <span id="welcomeUsername">
-
-				<?php
-				/*session_start();
-				$username = $_SESSION['username'];
-				echo $username;*/
-				?>	
-
-                Username
-
-				</span>
-			</h1>
+                    <?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; ?>
+                </span>
+            </h1>
 
 		 <p class="subtitle">What would you like to do today?</p>
             

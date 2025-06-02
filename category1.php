@@ -100,7 +100,9 @@ $contestants = $conn->query($contestant_query);
             <!-- User Info -->
             <a href="#" class="user-info" onclick="goToUserProfile()">
                 <div class="user-avatar">👤</div>
-                <span id="username">Username</span>
+                <span id="username">
+                    <?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; ?>
+                </span>
             </a>
         </div>
     </nav>

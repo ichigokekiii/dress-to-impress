@@ -31,9 +31,46 @@ $criteria = $criteria_result->fetch_all(MYSQLI_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voting Page - <?php echo htmlspecialchars($contestant['contestant_name']); ?></title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="navbar.css">
     <link rel="stylesheet" href="voting.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .navbar-links a {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+        }
+        /* Ensure consistent navbar height */
+        .navbar {
+            height: 70px;
+        }
+        .navbar-container {
+            height: 100%;
+        }
+        .navbar-brand img {
+            height: 35px;
+            transform: scale(1.3);
+            transform-origin: left center;
+        }
+        .navbar-links {
+            gap: 40px;
+        }
+        .navbar-links a {
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+        .user-info {
+            min-width: 120px;
+        }
+    </style>
 </head>
 <body>
     <!-- Navbar -->
@@ -41,7 +78,7 @@ $criteria = $criteria_result->fetch_all(MYSQLI_ASSOC);
         <div class="navbar-container">
             <!-- Logo -->
             <a class="navbar-brand" href="#" onclick="goToHome()">
-                <img src="dresstoimpress.png" alt="Dress to Impress Logo" height="45">
+                <img src="dresstoimpress.png" alt="Dress to Impress Logo" height="55">
             </a>
 
             <!-- Navigation Links -->
@@ -55,7 +92,9 @@ $criteria = $criteria_result->fetch_all(MYSQLI_ASSOC);
             <!-- User Info -->
             <a href="#" class="user-info" onclick="goToUserProfile()">
                 <div class="user-avatar">👤</div>
-                <span id="username">Username</span>
+                <span id="username">
+                    <?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; ?>
+                </span>
             </a>
         </div>
     </nav>
