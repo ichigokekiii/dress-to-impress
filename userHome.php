@@ -35,7 +35,7 @@ if (!isset($_SESSION['username']) || $_SESSION['userType'] !== 'Judge') {
                 <a href="userHome.php" onclick="goToPage('home')">HOME</a>
                 <a href="eventsHome.php" onclick="goToPage('events')">EVENTS</a>
                 <a href="resultHome.php" onclick="goToPage('results')">RESULTS</a>
-                <a href="contestantHome.php" onclick="goToPage('contestants')">CONTESTANTS</a>
+                <a href="contestants.php" onclick="goToPage('contestants')">CONTESTANTS</a>
             </div>
 
             <!-- User Info -->

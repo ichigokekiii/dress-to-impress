@@ -70,7 +70,7 @@ $result = $conn->query($query);
 				<a href="userHome.php">HOME</a>
 				<a href="eventsHome.php">EVENTS</a>
 				<a href="resultHome.php">RESULTS</a>
-				<a href="contestantHome.php">CONTESTANTS</a>
+				<a href="contestants.php">CONTESTANTS</a>
 			</div>
 
 			<!-- User Info -->
