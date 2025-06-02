@@ -52,23 +52,36 @@ if (isset($_POST['update_contest'])) {
 if (isset($_GET['id'])) {
     $contest_id = intval($_GET['id']);
 
+    try {
+        // Start transaction
+        $conn->begin_transaction();
 
-    $check_query = "SELECT COUNT(*) as count FROM contestant_table WHERE fk_contestant_contest = $contest_id";
-    $check_result = $conn->query($check_query);
-    $row = $check_result->fetch_assoc();
+        // Delete the contest
+        $query = "DELETE FROM contest_table WHERE contest_id = $contest_id";
+        if ($conn->query($query)) {
+            // Get the maximum ID after deletion
+            $max_id_query = "SELECT MAX(contest_id) as max_id FROM contest_table";
+            $result = $conn->query($max_id_query);
+            $max_id = ($result->fetch_assoc())['max_id'] ?? 0;
+            
+            // Reset auto-increment to max_id + 1
+            $reset_auto_increment = "ALTER TABLE contest_table AUTO_INCREMENT = " . ($max_id + 1);
+            $conn->query($reset_auto_increment);
 
-    if ($row['count'] > 0) {
-        $_SESSION['message'] = "Cannot delete contest: There are contestants associated with this contest";
-    } else {
-        $delete_query = "DELETE FROM contest_table WHERE contest_id = $contest_id";
-        if ($conn->query($delete_query)) {
-            $_SESSION['message'] = "Contest deleted successfully";
+            // Commit transaction
+            $conn->commit();
+            
+            $_SESSION['success'] = "Contest deleted successfully!";
         } else {
-            $_SESSION['message'] = "Error deleting contest: " . $conn->error;
+            throw new Exception($conn->error);
         }
+    } catch (Exception $e) {
+        // Rollback transaction on error
+        $conn->rollback();
+        $_SESSION['error'] = "Error deleting contest: " . $e->getMessage();
     }
-
-    header("Location: organizer_dashboard.php?page=contests");
+    
+    header("Location: admin_dashboard.php?page=contests");
     exit();
 }
 ?>

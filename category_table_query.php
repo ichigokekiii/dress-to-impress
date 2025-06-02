@@ -129,38 +129,50 @@ if (isset($_POST['save_category'])) {
 <?php ////DELETE
 
 if (isset($_GET['id'])) {
-    $id = $conn->real_escape_string($_GET['id']);
-
-    // Check if category is being used by any contestants
-    $check_query = "SELECT COUNT(*) as count FROM contestant_table WHERE fk_contestant_category = '$id'";
+    $category_id = intval($_GET['id']);
+    
+    // Check for related records in contestant_table
+    $check_query = "SELECT COUNT(*) as count FROM contestant_table WHERE fk_contestant_category = $category_id";
     $check_result = $conn->query($check_query);
     $row = $check_result->fetch_assoc();
-
+    
     if ($row['count'] > 0) {
-        header("Location: " . $_SERVER['HTTP_REFERER'] . "&category_error=in_use");
+        $_SESSION['error'] = "Cannot delete category: There are contestants associated with this category";
+        header("Location: admin_dashboard.php?page=categories");
         exit();
     }
 
-    // Get category info for logging before deletion
-    $info_query = "SELECT category_name FROM category_table WHERE category_id = '$id'";
-    $info_result = $conn->query($info_query);
-    $category = $info_result->fetch_assoc();
+    try {
+        // Start transaction
+        $conn->begin_transaction();
 
-    $query = "DELETE FROM category_table WHERE category_id = '$id'";
-    $result = $conn->query($query);
+        // Delete the category
+        $query = "DELETE FROM category_table WHERE category_id = $category_id";
+        if ($conn->query($query)) {
+            // Get the maximum ID after deletion
+            $max_id_query = "SELECT MAX(category_id) as max_id FROM category_table";
+            $result = $conn->query($max_id_query);
+            $max_id = ($result->fetch_assoc())['max_id'] ?? 0;
+            
+            // Reset auto-increment to max_id + 1
+            $reset_auto_increment = "ALTER TABLE category_table AUTO_INCREMENT = " . ($max_id + 1);
+            $conn->query($reset_auto_increment);
 
-    if ($result) {
-        // Log the deletion
-        $action = $conn->real_escape_string("Deleted category '" . $category['category_name'] . "'");
-        $log_query = "INSERT INTO logs_table (action, log_time) VALUES ('$action', NOW())";
-        $conn->query($log_query);
-        
-        header("Location: " . $_SERVER['HTTP_REFERER'] . "&category_success=deleted");
-        exit();
-    } else {
-        header("Location: " . $_SERVER['HTTP_REFERER'] . "&error=deletefail");
-        exit();
+            // Commit transaction
+            $conn->commit();
+            
+            $_SESSION['success'] = "Category deleted successfully!";
+        } else {
+            throw new Exception($conn->error);
+        }
+    } catch (Exception $e) {
+        // Rollback transaction on error
+        $conn->rollback();
+        $_SESSION['error'] = "Error deleting category: " . $e->getMessage();
     }
+    
+    header("Location: admin_dashboard.php?page=categories");
+    exit();
 }
 ?>
 

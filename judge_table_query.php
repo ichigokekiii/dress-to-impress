@@ -96,18 +96,50 @@ if (isset($_POST['save_judge'])) {
 <?php //DELETE
 
 if (isset($_GET['id'])) {
-    $id = $_GET['id'];
-
-    $query_judge = "DELETE FROM judge_table WHERE judge_id = '$id'";
-    $result_judge = $conn->query($query_judge);
-
-    if ($result_judge) {
-        header("Location: admin_dashboard.php?page=judges&judge_success=deleted");
-        exit();
-    } else {
-        header("Location: admin_dashboard.php?error=deletefail");
+    $judge_id = intval($_GET['id']);
+    
+    // Check for related records in score_table
+    $check_query = "SELECT COUNT(*) as count FROM score_table WHERE fk_score_judge = $judge_id";
+    $check_result = $conn->query($check_query);
+    $row = $check_result->fetch_assoc();
+    
+    if ($row['count'] > 0) {
+        $_SESSION['error'] = "Cannot delete judge: There are scores associated with this judge";
+        header("Location: admin_dashboard.php?page=judges");
         exit();
     }
+
+    try {
+        // Start transaction
+        $conn->begin_transaction();
+
+        // Delete the judge
+        $query = "DELETE FROM judge_table WHERE judge_id = $judge_id";
+        if ($conn->query($query)) {
+            // Get the maximum ID after deletion
+            $max_id_query = "SELECT MAX(judge_id) as max_id FROM judge_table";
+            $result = $conn->query($max_id_query);
+            $max_id = ($result->fetch_assoc())['max_id'] ?? 0;
+            
+            // Reset auto-increment to max_id + 1
+            $reset_auto_increment = "ALTER TABLE judge_table AUTO_INCREMENT = " . ($max_id + 1);
+            $conn->query($reset_auto_increment);
+
+            // Commit transaction
+            $conn->commit();
+            
+            $_SESSION['success'] = "Judge deleted successfully!";
+        } else {
+            throw new Exception($conn->error);
+        }
+    } catch (Exception $e) {
+        // Rollback transaction on error
+        $conn->rollback();
+        $_SESSION['error'] = "Error deleting judge: " . $e->getMessage();
+    }
+    
+    header("Location: admin_dashboard.php?page=judges");
+    exit();
 }
 ?>
 

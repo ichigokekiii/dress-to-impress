@@ -89,56 +89,47 @@ if (isset($_POST['update_criteria'])) {
 if (isset($_GET['id'])) {
     $criteria_id = intval($_GET['id']);
     
+    // Check for related records in score_table
+    $check_query = "SELECT COUNT(*) as count FROM score_table WHERE fk_score_criteria = $criteria_id";
+    $check_result = $conn->query($check_query);
+    $row = $check_result->fetch_assoc();
+    
+    if ($row['count'] > 0) {
+        $_SESSION['error'] = "Cannot delete criteria: There are scores associated with this criteria";
+        header("Location: admin_dashboard.php?page=criteria");
+        exit();
+    }
+
     try {
         // Start transaction
         $conn->begin_transaction();
-        
-        // First check if there are any scores using this criteria
-        $check_query = "SELECT COUNT(*) as count FROM score_table WHERE fk_score_criteria = ?";
-        $stmt = $conn->prepare($check_query);
-        $stmt->bind_param("i", $criteria_id);
-        $stmt->execute();
-        $result = $stmt->get_result()->fetch_assoc();
-        
-        if ($result['count'] > 0) {
-            throw new Exception("Cannot delete criteria: There are scores associated with this criteria");
-        }
-        
-        // Get criteria name for logging
-        $name_query = "SELECT criteria_name FROM criteria_table WHERE criteria_id = ?";
-        $stmt = $conn->prepare($name_query);
-        $stmt->bind_param("i", $criteria_id);
-        $stmt->execute();
-        $criteria = $stmt->get_result()->fetch_assoc();
-        
+
         // Delete the criteria
-        $delete_query = "DELETE FROM criteria_table WHERE criteria_id = ?";
-        $stmt = $conn->prepare($delete_query);
-        $stmt->bind_param("i", $criteria_id);
-        
-        if ($stmt->execute()) {
-            // Log the deletion
-            if (isset($_SESSION['users_id'])) {
-                $action = "Deleted criteria '" . $criteria['criteria_name'] . "'";
-                $log_query = "INSERT INTO logs_table (action, log_time, fk_logs_users) VALUES (?, NOW(), ?)";
-                $stmt = $conn->prepare($log_query);
-                $stmt->bind_param("si", $action, $_SESSION['users_id']);
-                $stmt->execute();
-            }
+        $query = "DELETE FROM criteria_table WHERE criteria_id = $criteria_id";
+        if ($conn->query($query)) {
+            // Get the maximum ID after deletion
+            $max_id_query = "SELECT MAX(criteria_id) as max_id FROM criteria_table";
+            $result = $conn->query($max_id_query);
+            $max_id = ($result->fetch_assoc())['max_id'] ?? 0;
             
+            // Reset auto-increment to max_id + 1
+            $reset_auto_increment = "ALTER TABLE criteria_table AUTO_INCREMENT = " . ($max_id + 1);
+            $conn->query($reset_auto_increment);
+
+            // Commit transaction
             $conn->commit();
-            $_SESSION['success'] = "Criteria deleted successfully";
+            
+            $_SESSION['success'] = "Criteria deleted successfully!";
         } else {
-            throw new Exception("Error deleting criteria");
+            throw new Exception($conn->error);
         }
     } catch (Exception $e) {
+        // Rollback transaction on error
         $conn->rollback();
-        $_SESSION['error'] = "Error: " . $e->getMessage();
+        $_SESSION['error'] = "Error deleting criteria: " . $e->getMessage();
     }
-
-    // Redirect based on user type
-    $redirect_page = ($_SESSION['userType'] === 'Admin') ? 'admin_dashboard.php' : 'organizer.php';
-    header("Location: $redirect_page?page=criteria");
+    
+    header("Location: admin_dashboard.php?page=criteria");
     exit();
 }
 

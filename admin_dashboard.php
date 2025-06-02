@@ -829,7 +829,122 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 		<!-- Users -->
 		<div id="users" class="d-none">
 			<h2>Users</h2>
-			<!-- Manage users -->
+			<button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addUserModal">Add User</button>
+			<input type="text" class="form-control search-box" placeholder="Search Users..." onkeyup="searchTable('userTable', this.value)">
+			
+			<?php
+			$query = "SELECT * FROM users_table ORDER BY username";
+			$query_run = $conn->query($query);
+			?>
+			<table class="table table-bordered" id="userTable">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Username</th>
+						<th>User Type</th>
+						<th style="width: 15%;">Action</th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php
+				if ($query_run) {
+					while ($row = mysqli_fetch_array($query_run)) {
+						echo "<tr>";
+						echo "<td>" . $row['users_id'] . "</td>";
+						echo "<td>" . htmlspecialchars($row['username']) . "</td>";
+						echo "<td>" . htmlspecialchars($row['userType']) . "</td>";
+						echo "<td>";
+						echo "<button type='button' class='btn btn-success btn-sm me-1' 
+								data-bs-toggle='modal'
+								data-bs-target='#editUserModal'
+								data-id='" . $row['users_id'] . "'
+								data-username='" . htmlspecialchars($row['username'], ENT_QUOTES) . "'
+								data-usertype='" . htmlspecialchars($row['userType'], ENT_QUOTES) . "'>
+								Edit
+							</button>";
+						echo "<button type='button' class='btn btn-danger btn-sm' onclick='confirmDeleteUser(" . $row['users_id'] . ")'>
+								Delete
+							</button>";
+						echo "</td>";
+						echo "</tr>";
+					}
+				}
+				?>
+				</tbody>
+			</table>
+
+			<!-- Add User Modal -->
+			<div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Add User</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<form action="user_table_query.php" method="POST" id="addUserForm">
+							<div class="modal-body">
+								<div class="mb-3">
+									<label for="username" class="form-label">Username</label>
+									<input type="text" class="form-control" id="username" name="username" required>
+								</div>
+								<div class="mb-3">
+									<label for="password" class="form-label">Password</label>
+									<input type="password" class="form-control" id="password" name="password" required>
+								</div>
+								<div class="mb-3">
+									<label for="userType" class="form-label">User Type</label>
+									<select class="form-select" id="userType" name="userType" required>
+										<option value="Admin">Admin</option>
+										<option value="Staff">Staff</option>
+										<option value="Judge">Judge</option>
+									</select>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+								<button type="submit" class="btn btn-primary" name="save_user">Save User</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<!-- Edit User Modal -->
+			<div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Edit User</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<form action="user_table_query.php" method="POST" id="editUserForm">
+							<div class="modal-body">
+								<input type="hidden" id="edit_user_id" name="user_id">
+								<div class="mb-3">
+									<label for="edit_username" class="form-label">Username</label>
+									<input type="text" class="form-control" id="edit_username" name="username" required>
+								</div>
+								<div class="mb-3">
+									<label for="edit_password" class="form-label">New Password (leave blank to keep current)</label>
+									<input type="password" class="form-control" id="edit_password" name="password">
+								</div>
+								<div class="mb-3">
+									<label for="edit_userType" class="form-label">User Type</label>
+									<select class="form-select" id="edit_userType" name="userType" required>
+										<option value="Admin">Admin</option>
+										<option value="Staff">Staff</option>
+										<option value="Judge">Judge</option>
+									</select>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+								<button type="submit" class="btn btn-primary" name="update_user">Update User</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
 		</div>
 
 		<!-- Logs -->
@@ -954,6 +1069,17 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 					editScoreModal.hide();
 				});
 			}
+
+			// Handle edit user button clicks
+			const editUserButtons = document.querySelectorAll('[data-bs-target="#editUserModal"]');
+			editUserButtons.forEach(button => {
+				button.addEventListener('click', function() {
+					document.getElementById('edit_user_id').value = this.getAttribute('data-id');
+					document.getElementById('edit_username').value = this.getAttribute('data-username');
+					document.getElementById('edit_userType').value = this.getAttribute('data-usertype');
+					document.getElementById('edit_password').value = ''; // Clear password field
+				});
+			});
 		});
 
 		function showPage(id) {
@@ -1071,6 +1197,22 @@ $upcoming_contests = $result->fetch_all(MYSQLI_ASSOC);
 			}).then((result) => {
 				if (result.isConfirmed) {
 					window.location.href = 'score_table_query.php?id=' + id;
+				}
+			});
+		}
+
+		function confirmDeleteUser(id) {
+			Swal.fire({
+				title: 'Are you sure?',
+				text: "You won't be able to revert this!",
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#d33',
+				cancelButtonColor: '#3085d6',
+				confirmButtonText: 'Yes, delete it!'
+			}).then((result) => {
+				if (result.isConfirmed) {
+					window.location.href = 'user_table_query.php?id=' + id;
 				}
 			});
 		}

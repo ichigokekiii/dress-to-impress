@@ -130,33 +130,38 @@ if (isset($_POST['update_score'])) {
 
 // Delete Score
 if (isset($_GET['id'])) {
-    $score_id = $conn->real_escape_string($_GET['id']);
+    $score_id = intval($_GET['id']);
 
     try {
         // Start transaction
         $conn->begin_transaction();
 
-        // Delete score
-        $query = "DELETE FROM score_table WHERE score_id = ?";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("i", $score_id);
-        $stmt->execute();
+        // Delete the score
+        $query = "DELETE FROM score_table WHERE score_id = $score_id";
+        if ($conn->query($query)) {
+            // Get the maximum ID after deletion
+            $max_id_query = "SELECT MAX(score_id) as max_id FROM score_table";
+            $result = $conn->query($max_id_query);
+            $max_id = ($result->fetch_assoc())['max_id'] ?? 0;
+            
+            // Reset auto-increment to max_id + 1
+            $reset_auto_increment = "ALTER TABLE score_table AUTO_INCREMENT = " . ($max_id + 1);
+            $conn->query($reset_auto_increment);
 
-        // Log the action
-        $log_query = "INSERT INTO activity_log (username, action, details) VALUES (?, 'Delete Score', ?)";
-        $log_stmt = $conn->prepare($log_query);
-        $details = "Deleted score ID: $score_id";
-        $log_stmt->bind_param("ss", $_SESSION['username'], $details);
-        $log_stmt->execute();
-
-        $conn->commit();
-        $_SESSION['message'] = "Score deleted successfully";
+            // Commit transaction
+            $conn->commit();
+            
+            $_SESSION['success'] = "Score deleted successfully!";
+        } else {
+            throw new Exception($conn->error);
+        }
     } catch (Exception $e) {
+        // Rollback transaction on error
         $conn->rollback();
         $_SESSION['error'] = "Error deleting score: " . $e->getMessage();
     }
-
-    header("Location: " . $_SERVER['HTTP_REFERER']);
+    
+    header("Location: admin_dashboard.php?page=scores");
     exit();
 }
 

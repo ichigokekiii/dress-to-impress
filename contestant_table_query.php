@@ -174,29 +174,26 @@ if (isset($_POST['save_contestant'])) {
 
 // DELETE
 if (isset($_GET['id'])) {
-    if (!isset($_SESSION['username']) || !isset($_SESSION['userType'])) {
-        header("Location: login.php");
+    $contestant_id = intval($_GET['id']);
+    
+    // Check for related records in score_table
+    $check_query = "SELECT COUNT(*) as count FROM score_table WHERE fk_score_contestant = $contestant_id";
+    $check_result = $conn->query($check_query);
+    $row = $check_result->fetch_assoc();
+    
+    if ($row['count'] > 0) {
+        $_SESSION['error'] = "Cannot delete contestant: There are scores associated with this contestant";
+        header("Location: admin_dashboard.php?page=contestants");
         exit();
     }
 
-    $id = intval($_GET['id']);
-    
     try {
-
+        // Start transaction
         $conn->begin_transaction();
-        
-        // First delete any related scores
-        $delete_scores = "DELETE FROM score_table WHERE fk_score_contestant = ?";
-        $stmt = $conn->prepare($delete_scores);
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-    
-        // Then delete the contestant
-        $delete_query = "DELETE FROM contestant_table WHERE contestant_id = ?";
-        $stmt = $conn->prepare($delete_query);
-        $stmt->bind_param("i", $id);
-        
-        if ($stmt->execute()) {
+
+        // Delete the contestant
+        $query = "DELETE FROM contestant_table WHERE contestant_id = $contestant_id";
+        if ($conn->query($query)) {
             // Get the maximum ID after deletion
             $max_id_query = "SELECT MAX(contestant_id) as max_id FROM contestant_table";
             $result = $conn->query($max_id_query);
@@ -205,38 +202,22 @@ if (isset($_GET['id'])) {
             // Reset auto-increment to max_id + 1
             $reset_auto_increment = "ALTER TABLE contestant_table AUTO_INCREMENT = " . ($max_id + 1);
             $conn->query($reset_auto_increment);
-            
+
             // Commit transaction
             $conn->commit();
             
-            // Set session flag for success message
-            $_SESSION['delete_success'] = true;
-            
-            // Redirect based on user type with session preservation
-            if ($_SESSION['userType'] == 'Admin') {
-                header("Location: admin_dashboard.php?page=contestants");
-            } else {
-                header("Location: organizer.php?page=contestants");
-            }
-            exit();
+            $_SESSION['success'] = "Contestant deleted successfully!";
         } else {
             throw new Exception($conn->error);
         }
     } catch (Exception $e) {
-        // Rollback transaction
+        // Rollback transaction on error
         $conn->rollback();
-        
-        // Set session flag for error message
-        $_SESSION['delete_error'] = $e->getMessage();
-        
-        // Redirect based on user type
-        if ($_SESSION['userType'] == 'Admin') {
-            header("Location: admin_dashboard.php?page=contestants");
-        } else {
-            header("Location: organizer.php?page=contestants");
-        }
-        exit();
+        $_SESSION['error'] = "Error deleting contestant: " . $e->getMessage();
     }
+    
+    header("Location: admin_dashboard.php?page=contestants");
+    exit();
 }
 
 // Success and error messages
